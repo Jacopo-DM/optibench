@@ -187,7 +187,7 @@ needs characterisation tests; the 83 functions must keep passing.
 
 Tier 1, the walking skeleton:
 
-- N1. `optibench.networks` with `Policy`, `single`, `Task`, `Scores` and
+- N1. done (2026-10-24). `optibench.networks` with `Policy`, `single`, `Task`, `Scores` and
   `Xor` (`networks/__init__.py`, `policy.py`, `task.py`, `xor.py`,
   `tests/test_networks_xor.py`, exports in `optibench/__init__.py`).
   Serves: the interface and the XOR criterion. Verify: a hand-built

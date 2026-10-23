@@ -6,6 +6,7 @@ from the published formulas. Every function evaluates a batch of points,
 takes its constants as keyword arguments and knows its global minimum.
 """
 
+from . import networks
 from .baseline import random_search
 from .functions import (
     Ackley,
@@ -190,6 +191,7 @@ __all__ = [
     "evaluate_formula",
     "make",
     "names",
+    "networks",
     "random_search",
     "variables",
 ]

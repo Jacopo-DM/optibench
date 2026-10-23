@@ -1,7 +1,8 @@
 # optibench (package)
 
-The test functions, the `Problem` base class, the registry, `Tracked` and
-the random-search baseline.
+The test functions, the `Problem` base class, the registry, `Tracked`,
+the random-search baseline, and `networks/`: tasks that score batches of
+networks instead of points.
 
 Interface: see [CODEMAP.md](../../CODEMAP.md). Spec and reasons: see
 [DESIGN.md](../../DESIGN.md).
@@ -9,10 +10,12 @@ Interface: see [CODEMAP.md](../../CODEMAP.md). Spec and reasons: see
 ## Assumes
 
 - Callers pass points shaped `(n, d)`; one point is `x[None]`.
+- A network task calls a policy with inputs `(n, n_in)` and expects
+  outputs `(n, n_out)`; one network is wrapped with `networks.single`.
 - A problem is pure: same points, same values; only `Tracked` keeps state.
 
 ## Must never depend on
 
 - `ailigment` or any other optimiser code.
-- Any run-time library except numpy.
+- Any run-time library except numpy, pydantic and sympy.
 - The SFU site's GPL-2.0 MATLAB and R code (see DESIGN.md).
