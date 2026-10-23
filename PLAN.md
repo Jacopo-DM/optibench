@@ -7,6 +7,45 @@ optimisation pages of the SFU Virtual Library of Simulation Experiments, for
 testing optimisation algorithms (CGP-based ones from `ailigment`, and any
 other). The approved specs are in DESIGN.md, the task list below.
 
+Network tasks, asked for by `multineat` (2026-10-24): tasks that score a
+network (a function from an input vector to an output vector, with state
+for recurrent ones) instead of a point. All four are new behaviour, numpy
+only, written from the papers, with fixed seeds; done in this order.
+
+- `network-core` (draft, added 2026-10-24): optibench scores a batch of
+  networks through one batched interface (inputs `(n_nets, n_in)` to
+  outputs `(n_nets, n_out)`, a `reset`, and a wrapper for one plain
+  callable) on XOR and on single and double pole balancing, each with
+  and without velocities, with Gruau's damping score and the 625-start
+  generalisation test for double pole without velocities. Success: one
+  simulator step equals a hand-computed step of the published equations to
+  1e-12; a hand-built 2-2-1 network solves XOR; a linear controller
+  balances both velocity variants for the full budget (100,000 steps for
+  double pole); a recurrent reference controller that differences its last
+  two observations balances both variants without velocities; 1,000
+  networks on 100,000 double-pole steps run in under 10 s on this Mac.
+- `network-fit` (draft, added 2026-10-24): fit-a-function for any
+  registered problem (inputs scaled to -1..1, targets to 0..1, score =
+  squared error / variance of the sample, so 0 is perfect and 1 is the
+  mean's score) and image match on procedurally drawn targets (a smiley,
+  rings, a checkerboard), as a point (a 100 x 100 image is a 10,000-d
+  problem) and as a network drawing intensity from (x, y, distance from
+  centre). Success: the exact function scores 0 and the mean 1 on every
+  registered problem; the image problems pass `tests/test_all_problems.py`
+  with their minimum 0 at the target; a network that returns the target
+  scores 0.
+- `network-pendulum` (draft, added 2026-10-24): pendulum swing-up, score =
+  time upright averaged over 15 fixed start states per seed. Success: one
+  step equals the published equation to 1e-12; an energy-pumping
+  controller that hands over to a linear one swings up and holds in all 15
+  trials; a network that outputs 0 scores 0.
+- `network-maze` (draft, added 2026-10-24): Lehman and Stanley's hard maze
+  for novelty search, returning the score (distance to the goal) and a
+  behaviour (the robot's final position); the novelty archive stays the
+  caller's. Success: walls stop the robot in tests; a scripted route
+  reaches the goal; a controller that steers straight at the goal ends in
+  the dead end, which shows the maze is deceptive.
+
 ## Current state (2026-10-24)
 
 - Tier 1 (walking skeleton) done and on `main` (4133d55; `main` had no
