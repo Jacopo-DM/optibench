@@ -15,7 +15,7 @@ Every task takes a seed and a trial count (the same seed gives the same
 start states, so a network's score repeats), has a solved test, and
 returns its natural reward, negative where the physics gives one.
 
-- `network-core` (draft, added 2026-10-24): optibench scores a batch of
+- `network-core` (approved 2026-10-24): optibench scores a batch of
   networks through one batched interface (inputs `(n_nets, n_in)` to
   outputs `(n_nets, n_out)`, a `reset`, and a wrapper for one plain
   callable) on XOR and on single and double pole balancing, each with
@@ -30,7 +30,7 @@ returns its natural reward, negative where the physics gives one.
   double pole); a recurrent reference controller that differences its last
   two observations balances both variants without velocities; 1,000
   networks on 100,000 double-pole steps run in under 10 s on this Mac.
-- `network-fit` (draft, added 2026-10-24): fit-a-function for any
+- `network-fit` (approved 2026-10-24): fit-a-function for any
   registered problem (inputs scaled to -1..1, targets to 0..1, score =
   squared error / variance of the sample, so 0 is perfect and 1 is the
   mean's score) and image match on procedurally drawn targets (a smiley,
@@ -40,12 +40,12 @@ returns its natural reward, negative where the physics gives one.
   registered problem; the image problems pass `tests/test_all_problems.py`
   with their minimum 0 at the target; a network that returns the target
   scores 0.
-- `network-pendulum` (draft, added 2026-10-24): pendulum swing-up, score =
+- `network-pendulum` (approved 2026-10-24): pendulum swing-up, score =
   time upright averaged over 15 fixed start states per seed. Success: one
   step equals the published equation to 1e-12; an energy-pumping
   controller that hands over to a linear one swings up and holds in all 15
   trials; a network that outputs 0 scores 0.
-- `network-maze` (draft, added 2026-10-24): a deceptive maze for novelty
+- `network-maze` (approved 2026-10-24): a deceptive maze for novelty
   search, returning the score (10,000 minus the closest distance to the
   goal) and a behaviour (the robot's final position); the novelty archive
   stays the caller's. Instances: Lehman and Stanley's medium and hard maps,
@@ -55,7 +55,7 @@ returns its natural reward, negative where the physics gives one.
   robot in tests; a scripted route reaches the goal; a controller that
   steers straight at the goal ends in the dead end, which shows the maze
   is deceptive.
-- `network-ballkeeper` (draft, added 2026-10-24): ball keeping (no
+- `network-ballkeeper` (approved 2026-10-24): ball keeping (no
   paper; MultiNEAT's `ball_keeper.py` was the only source): a floor and
   three walls under gravity, an agent that runs and jumps when grounded,
   a ball dropped with a random x and x velocity, elastic circle-circle and
