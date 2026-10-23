@@ -194,7 +194,7 @@ Tier 1, the walking skeleton:
   2-2-1 network scores 16 and is solved; a constant network is not; a
   wrapped single callable and a batch of the same network score alike.
   Risk low; about 250 lines, one new concept (a task).
-- N2. `TrackedTask` (`networks/tracked.py`, its tests). Serves:
+- N2. done (2026-10-24). `TrackedTask` (`networks/tracked.py`, its tests). Serves:
   evaluations to solve. Verify: counts one per network per trial, keeps
   the best score and the first solving evaluation across calls. Risk low;
   about 80 lines.

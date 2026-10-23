@@ -7,6 +7,7 @@ and returns one score and one solved flag per network.
 
 from .policy import Policy, single
 from .task import Scores, Task
+from .tracked import TrackedTask
 from .xor import Xor
 
-__all__ = ["Policy", "Scores", "Task", "Xor", "single"]
+__all__ = ["Policy", "Scores", "Task", "TrackedTask", "Xor", "single"]
