@@ -48,18 +48,20 @@ returns its natural reward, negative where the physics gives one.
 - `network-maze` (draft, added 2026-10-24): a deceptive maze for novelty
   search, returning the score (10,000 minus the closest distance to the
   goal) and a behaviour (the robot's final position); the novelty archive
-  stays the caller's. Instances: MultiNEAT's `NoveltySearch.py` layout and
-  dynamics (open question: its numbers come from LGPL code) and Lehman and
-  Stanley's medium and hard maps from their paper. Success: walls stop the
+  stays the caller's. Instances: Lehman and Stanley's medium and hard maps,
+  from their paper only (the user, 2026-10-24: papers only; MultiNEAT's
+  `NoveltySearch.py` layout is read afterwards as a check, as `cocoex` is
+  for BBOB, and any difference is reported). Success: walls stop the
   robot in tests; a scripted route reaches the goal; a controller that
   steers straight at the goal ends in the dead end, which shows the maze
   is deceptive.
-- `network-ballkeeper` (draft, added 2026-10-24): ball keeping, from the
-  physics MultiNEAT's `ball_keeper.py` described (gravity -500, a floor and
-  three walls, an agent that runs and jumps when grounded, a ball dropped
-  from height 450 with a random x and x velocity; the agent acts every 20
-  steps of 1/50 s), with elastic circle-circle and circle-wall collisions
-  in numpy. Score = steps until the ball touches the floor, capped at
+- `network-ballkeeper` (draft, added 2026-10-24): ball keeping (no
+  paper; MultiNEAT's `ball_keeper.py` was the only source): a floor and
+  three walls under gravity, an agent that runs and jumps when grounded,
+  a ball dropped with a random x and x velocity, elastic circle-circle and
+  circle-wall collisions in numpy, with constants of optibench's own from
+  the equations (the user, 2026-10-24: papers only), then checked against
+  the old example's numbers afterwards. Score = steps until the ball touches the floor, capped at
   15,000, averaged over 20 starts; solved at 10,000. Success: a ball
   alone keeps its energy through 100 bounces to 1e-9; a scripted agent
   that stays under the ball and jumps on time reaches 10,000 steps; an
