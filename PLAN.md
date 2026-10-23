@@ -11,13 +11,19 @@ Network tasks, asked for by `multineat` (2026-10-24): tasks that score a
 network (a function from an input vector to an output vector, with state
 for recurrent ones) instead of a point. All four are new behaviour, numpy
 only, written from the papers, with fixed seeds; done in this order.
+Every task takes a seed and a trial count (the same seed gives the same
+start states, so a network's score repeats), has a solved test, and
+returns its natural reward, negative where the physics gives one.
 
 - `network-core` (draft, added 2026-10-24): optibench scores a batch of
   networks through one batched interface (inputs `(n_nets, n_in)` to
   outputs `(n_nets, n_out)`, a `reset`, and a wrapper for one plain
   callable) on XOR and on single and double pole balancing, each with
   and without velocities, with Gruau's damping score and the 625-start
-  generalisation test for double pole without velocities. Success: one
+  generalisation test for double pole without velocities; and a
+  `Tracked`-style counter that records evaluations, the best score so far
+  and the evaluation at which the task was first solved, so a caller can
+  report evaluations to solve over 20 seeds. Success: one
   simulator step equals a hand-computed step of the published equations to
   1e-12; a hand-built 2-2-1 network solves XOR; a linear controller
   balances both velocity variants for the full budget (100,000 steps for
@@ -39,12 +45,25 @@ only, written from the papers, with fixed seeds; done in this order.
   step equals the published equation to 1e-12; an energy-pumping
   controller that hands over to a linear one swings up and holds in all 15
   trials; a network that outputs 0 scores 0.
-- `network-maze` (draft, added 2026-10-24): Lehman and Stanley's hard maze
-  for novelty search, returning the score (distance to the goal) and a
-  behaviour (the robot's final position); the novelty archive stays the
-  caller's. Success: walls stop the robot in tests; a scripted route
-  reaches the goal; a controller that steers straight at the goal ends in
-  the dead end, which shows the maze is deceptive.
+- `network-maze` (draft, added 2026-10-24): a deceptive maze for novelty
+  search, returning the score (10,000 minus the closest distance to the
+  goal) and a behaviour (the robot's final position); the novelty archive
+  stays the caller's. Instances: MultiNEAT's `NoveltySearch.py` layout and
+  dynamics (open question: its numbers come from LGPL code) and Lehman and
+  Stanley's medium and hard maps from their paper. Success: walls stop the
+  robot in tests; a scripted route reaches the goal; a controller that
+  steers straight at the goal ends in the dead end, which shows the maze
+  is deceptive.
+- `network-ballkeeper` (draft, added 2026-10-24): ball keeping, from the
+  physics MultiNEAT's `ball_keeper.py` described (gravity -500, a floor and
+  three walls, an agent that runs and jumps when grounded, a ball dropped
+  from height 450 with a random x and x velocity; the agent acts every 20
+  steps of 1/50 s), with elastic circle-circle and circle-wall collisions
+  in numpy. Score = steps until the ball touches the floor, capped at
+  15,000, averaged over 20 starts; solved at 10,000. Success: a ball
+  alone keeps its energy through 100 bounces to 1e-9; a scripted agent
+  that stays under the ball and jumps on time reaches 10,000 steps; an
+  agent that stands still scores the ball's first fall time.
 
 ## Current state (2026-10-24)
 
