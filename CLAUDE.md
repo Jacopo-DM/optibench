@@ -11,7 +11,7 @@ All commands run from the repo root with uv (Python 3.13).
 
 | Purpose | Command |
 |---------|---------|
-| Install or rebuild the environment (numpy, pydantic, sympy; dev group: pytest, pytest-cov, hypothesis, mypy, pyright, ty, ruff, pillow, pre-commit, nbclient, nbformat, ipykernel, coco-experiment, which has no Python 3.13 wheel and is compiled from its source archive with Xcode's compiler) | `uv sync` |
+| Install or rebuild the environment (numpy, pydantic, sympy, numba; dev group: pytest, pytest-cov, hypothesis, mypy, pyright, ty, ruff, pillow, pre-commit, nbclient, nbformat, ipykernel, coco-experiment, which has no Python 3.13 wheel and is compiled from its source archive with Xcode's compiler) | `uv sync` |
 | Format | `uv run ruff format` |
 | Lint (auto-fixes, unsafe fixes included: read the diff) | `uv run ruff check` |
 | Lint as the Stop hook and CI do | `uv run ruff format --check && uv run ruff check --no-fix` |
@@ -49,8 +49,10 @@ Before every commit run format, lint, both type checks and the tests above.
   decisions, rejected approaches, results) and this file (commands, rules).
   Each fact lives in exactly one file.
 - This library never imports `ailigment` or any other optimiser code, and
-  depends on numpy, pydantic and sympy (for `formula()`, approved
-  2026-10-17) only at run time. A new run-time dependency needs the user's
+  depends on numpy, pydantic, sympy (for `formula()`, approved
+  2026-10-17) and numba (for the network simulations, approved
+  2026-10-24) only at run time. numba is imported only in
+  `networks/compiled.py`. A new run-time dependency needs the user's
   approval.
 - Every function is written from its published formula, never from the
   SFU site's MATLAB or R code (GPL-2.0). Read the formula image on the
@@ -92,6 +94,10 @@ Before every commit run format, lint, both type checks and the tests above.
   literature, or found numerically from a published point (say which in
   `Minimum.source`, and give its accuracy in `Minimum.tolerance`).
 - Evaluation is vectorised over the batch: no Python loop over points.
+  A simulation that steps one network at a time loops in code compiled
+  through `networks/compiled.py` instead; tests run it uncompiled
+  (`NUMBA_DISABLE_JIT=1` in `tests/conftest.py`), so a change there is
+  checked compiled by `scripts.timing` too.
 - Keep each file under 400 lines; split a group module before it grows past,
   alphabetically, naming the parts after their first and last function
   (`many_local_minima_bukin_to_gramacy.py`) or after what they share

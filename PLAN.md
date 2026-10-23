@@ -201,7 +201,7 @@ Tier 1, the walking skeleton:
 
 Tier 2, in order:
 
-- N3. numba as a run-time dependency (`uv add numba`, 43 MB, approved
+- N3. done (2026-10-24). numba as a run-time dependency (`uv add numba`, 43 MB, approved
   2026-10-24) behind one typed module (`networks/compiled.py`: the only
   import of numba, its decorators wrapped so mypy and pyright stay strict),
   `NUMBA_DISABLE_JIT=1` in `tests/conftest.py`, and the cart dynamics

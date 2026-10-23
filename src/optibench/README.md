@@ -17,5 +17,6 @@ Interface: see [CODEMAP.md](../../CODEMAP.md). Spec and reasons: see
 ## Must never depend on
 
 - `ailigment` or any other optimiser code.
-- Any run-time library except numpy, pydantic and sympy.
+- Any run-time library except numpy, pydantic, sympy and numba (numba
+  only through `networks/compiled.py`).
 - The SFU site's GPL-2.0 MATLAB and R code (see DESIGN.md).
