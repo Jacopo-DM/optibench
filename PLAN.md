@@ -178,6 +178,60 @@ COCO's Python package as a dev-only dependency are approved too.
 6. open (the user, 2026-10-23: yes, later): a Sphinx docs site on GitHub
    Pages with `/zz-09-python-docs`.
 
+### Goal `network-core` (spec approved 2026-10-24, task list proposed)
+
+Every task: tests first, then the code; full suite, ruff, mypy and
+pyright green before each commit; README, CODEMAP.md and DESIGN.md results
+updated in the same commit. All files are new, so no existing behaviour
+needs characterisation tests; the 83 functions must keep passing.
+
+Tier 1, the walking skeleton:
+
+- N1. `optibench.networks` with `Policy`, `single`, `Task`, `Scores` and
+  `Xor` (`networks/__init__.py`, `policy.py`, `task.py`, `xor.py`,
+  `tests/test_networks_xor.py`, exports in `optibench/__init__.py`).
+  Serves: the interface and the XOR criterion. Verify: a hand-built
+  2-2-1 network scores 16 and is solved; a constant network is not; a
+  wrapped single callable and a batch of the same network score alike.
+  Risk low; about 250 lines, one new concept (a task).
+- N2. `TrackedTask` (`networks/tracked.py`, its tests). Serves:
+  evaluations to solve. Verify: counts one per network per trial, keeps
+  the best score and the first solving evaluation across calls. Risk low;
+  about 80 lines.
+
+Tier 2, in order:
+
+- N3. numba as a run-time dependency (`uv add numba`, 43 MB, approved
+  2026-10-24) behind one typed module (`networks/compiled.py`: the only
+  import of numba, its decorators wrapped so mypy and pyright stay strict),
+  `NUMBA_DISABLE_JIT=1` in `tests/conftest.py`, and the cart dynamics
+  (`networks/cart.py`: Wieland's equations for N poles, RK4). CLAUDE.md's
+  dependency rule names numba. Verify: one network step equals two RK4
+  steps computed by hand from Gomez's Appendix A to 1e-12, for one and two
+  poles. Risk medium (numba with strict typing, and coverage of compiled
+  code); about 200 lines, one new dependency.
+- N4. `SinglePole` and `DoublePole` with `velocities`, `start_angle`,
+  inputs, force, trials and seeds (`networks/poles.py`, its tests).
+  Verify: a linear state-feedback controller (gains from the linearised
+  equations, found once and written into the test with how) balances both
+  velocity variants for 100,000 steps; a recurrent controller that
+  differences its last two observations balances both variants without
+  them; a zero network fails; the same seed repeats every trial. Risk
+  medium to high (finding controllers good for 100,000 steps); about 300
+  lines.
+- N5. Gruau's damping score and the 625-start solution test for
+  `DoublePole(velocities=False)`. Verify: the score of a hand-made
+  trajectory equals eq. 3 and 4 computed by hand; the recurrent reference
+  passes at least 200 of 625. Risk medium (the start ranges are open);
+  about 120 lines.
+- N6. The speed check in `scripts/timing.py`: 1,000 copies of the linear
+  reference on 100,000 double-pole steps, compiled, under 10 s, run 5
+  times for the median and spread. Risk low; about 40 lines.
+
+Tier 3, not planned: the start ranges from Gruau et al. (1996) once that
+paper is found (the open question in the spec); any pole variant beyond
+the four in the spec.
+
 ## Open questions
 
 None.

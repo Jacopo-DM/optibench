@@ -255,7 +255,7 @@ from the parameters).
 Estimated size: about 83 formulas and a facade, roughly 1500 lines with
 tests; the BBOB transforms are the largest part.
 
-### Spec: network-core (proposed 2026-10-24, the user's answers in it)
+### Approved spec: network-core (the user, 2026-10-24)
 
 Users: `multineat` (and any neuroevolution caller) scores a population of
 networks on XOR and on pole balancing, and reports evaluations to solve
