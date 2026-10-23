@@ -255,6 +255,87 @@ from the parameters).
 Estimated size: about 83 formulas and a facade, roughly 1500 lines with
 tests; the BBOB transforms are the largest part.
 
+### Spec: network-core (proposed 2026-10-24, the user's answers in it)
+
+Users: `multineat` (and any neuroevolution caller) scores a population of
+networks on XOR and on pole balancing, and reports evaluations to solve
+over 20 seeds. A network is anything that maps a batch of input vectors to
+a batch of output vectors and can reset its recurrent state.
+
+Interface (the user, 2026-10-24: batched, one callable wrapped):
+
+- `optibench.networks.Policy`, a `Protocol`: `reset(n)` before each trial,
+  and `__call__(inputs)` from `(n, n_in)` to `(n, n_out)` floats.
+  `single(fn, reset=None)` wraps one plain callable (one vector in, one
+  out) as a batch of one.
+- `Task`, a frozen pydantic base like `Problem`: `n_inputs`, `n_outputs`,
+  `evaluate(policy, n, seed=0, trials=1) -> Scores`. Trials run one after
+  another with `reset(n)` before each; the same seed gives the same start
+  states. `Scores` holds `score` and `solved`, each shaped `(n,)`, the
+  score averaged over trials and its natural sign kept.
+- `TrackedTask(task)`: counts evaluations (one per network per trial),
+  keeps the best score so far and the evaluation at which `solved` was
+  first true, like `Tracked` for problems.
+
+Tasks:
+
+- `Xor`: inputs (0, 0), (0, 1), (1, 0), (1, 1), no bias (the caller adds
+  one). Score (4 - sum of absolute errors)^2, 16 when perfect; solved when
+  all four outputs fall on the correct side of 0.5.
+- `SinglePole` and `DoublePole`, each with `velocities: bool`, from Gomez,
+  Schmidhuber and Miikkulainen (2008, Appendix A: Wieland's equations for
+  N poles on one cart, with friction). Track +-2.4 m; failure angle 12 deg
+  (one pole) or 36 deg (two); cart 1.0 kg; poles 0.1 kg with half length
+  0.5 m, and for the second pole 0.01 kg and 0.05 m; friction 0.0005 (cart)
+  and 0.000002 (hinges), used for the single pole too because the paper's
+  single-pole table lists none; g = -9.8 m/s^2, the sign the equations
+  need. RK4 with 0.01 s; one network step is 0.02 s (two RK4 steps).
+  `start_angle` is a field, default 4 deg from Gomez (NEAT's paper used
+  1 deg; the user, 2026-10-24); the second pole starts vertical. Inputs:
+  x / 2.4, x' / 2, each angle / its failure angle, each angular velocity
+  / 2 (optibench's own scale; the papers only say "scaled to [-1, 1]");
+  without velocities only x and the angles. Output: one value in -1..1
+  (clipped), force = 10 N times it, and at least 10/256 N in magnitude
+  as in the papers (the user, 2026-10-24: -1..1). Score = network steps
+  balanced, budget 100,000; solved = the full budget. Trial 0 starts
+  from the published state; later trials draw x, x', the first angle and
+  its velocity uniformly from the seed within half of each input bound.
+- `DoublePole(velocities=False)` also gives Gruau, Whitley and Pyeatt's
+  (1996) damping score over 1,000 steps as Stanley and Miikkulainen (2002,
+  eq. 3 and 4) state it, F = 0.1 t/1000 + 0.9 f2, and their solution
+  test: 100,000 steps from the start state and at least 200 of 625 start
+  states (each of x, x', the first angle and its velocity at 0.05, 0.25,
+  0.5, 0.75 and 0.95 of its range) balanced for 1,000 steps.
+
+Speed (the user, 2026-10-24: keep 10 s, add numba): the cart simulation
+is compiled with numba (run-time dependency, 43 MB on macOS with
+llvmlite). 1,000 networks on 100,000 double-pole steps take under 10 s on
+this Mac, excluding the policy's own time, checked by `scripts.timing`.
+Tests run the same code uncompiled (`NUMBA_DISABLE_JIT=1`, set in
+`tests/conftest.py`) so coverage sees it.
+
+Proof (the user, 2026-10-24: reference solutions): one network step
+equals two hand-computed RK4 steps of the appendix equations to 1e-12; a
+hand-built 2-2-1 network solves XOR; a linear state-feedback controller
+(gains from the linearised equations) balances both velocity variants
+for 100,000 steps; a recurrent controller that differences its last two
+observations to estimate the velocities balances both variants without
+them.
+
+Non-goals: the novelty archive, a population or any optimiser, rendering,
+gym compatibility. The 83 functions and their tests do not change.
+
+Rejected: tasks as a kind of `Problem` (its contract is points in, values
+out, no state, and recurrent networks break it); one network per call
+(50 million Python calls per generation; the user chose batched); Euler
+integration (the papers use RK4); plain numpy (about 80 s for the worst
+case above; the user chose numba).
+
+Open: the ranges of the 625 start states come from Gruau et al. (1996),
+which is not downloaded; NEAT's paper says only "scaled to the range of
+the input variable". Until they are found, the ranges are the input
+bounds above, and the test says so.
+
 ## Decisions
 
 - Name (2026-10-23, the user's request): the library was renamed from
