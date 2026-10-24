@@ -171,14 +171,17 @@ class Poles(Task):
             moving = states[live]
             advance(moving, force[live], self.cart)
             states[live] = moving
-            if offsets is not None:
-                offsets[step % len(offsets), live] = np.abs(
-                    moving[:, :4] / self.scale[:4],
-                ).sum(axis=1)
             alive[live] = (np.abs(moving[:, 0]) <= TRACK) & np.all(
                 np.abs(moving[:, 2::2]) <= limit,
                 axis=1,
             )
+
+            # Only steps that ended balanced enter the window.
+            if offsets is not None:
+                kept = alive[live]
+                offsets[step % len(offsets), live[kept]] = np.abs(
+                    moving[kept, :4] / self.scale[:4],
+                ).sum(axis=1)
             balanced += alive
             if not alive.any():
                 break
