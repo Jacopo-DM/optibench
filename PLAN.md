@@ -4,7 +4,7 @@
 
 A library of optimisation test functions with known answers, built from the
 optimisation pages of the SFU Virtual Library of Simulation Experiments, for
-testing optimisation algorithms (CGP-based ones from `ailigment`, and any
+testing optimisation algorithms (CGP-based ones from `entwined`, and any
 other). The approved specs are in DESIGN.md, the task list below.
 
 Network tasks, asked for by `multineat` (2026-10-24): tasks that score a
@@ -74,7 +74,7 @@ returns its natural reward, negative where the physics gives one.
   commits, so the branch `tier1-skeleton` simply became `main`).
 - Private GitHub repo `Jacopo-DM/optibench` created and `main` pushed
   (2026-10-16, the user's say-so).
-- Made public on 2026-10-18 (the user's choice), so ailigment's CI can
+- Made public on 2026-10-18 (the user's choice), so entwined's CI can
   install optibench as a git dependency without credentials.
 - Tier 2, the functions: all six SFU groups are done, 49 functions, on
   `main` and pushed (ced98e3, 2026-10-17): 500 tests, coverage 100%, ruff and
@@ -108,7 +108,7 @@ returns its natural reward, negative where the physics gives one.
   Dependabot's PR #1 (setup-uv 9.0.0 to 10.3.0) was merged by rebase on
   2026-10-17 (2aea30c, the user's say-so), so `ci.yml` now pins a newer
   setup-uv than the user's template.
-- `ailigment` does not use this library yet; its adapters are separate
+- `entwined` does not use this library yet; its adapters are separate
   modules in that repo (see its PLAN.md).
 - Module `formula` done (2026-10-18): all 83 problems have `formula()`,
   abstract on `Problem` (results, decisions and the amended spec in
@@ -134,11 +134,11 @@ returns its natural reward, negative where the physics gives one.
 
 Next step: the spec of goal `network-fit` (the next goal in order), with
 `/zz-02-project-plan`; `network-core` is done on branch `network-core`. In
-`ailigment` (2026-10-24, its own session): the move to `optibench` at
+`entwined` (2026-10-24, its own session): the move to `optibench` at
 693876d is merged into its branch `better-search` (f2366b3 on the Mac; 384
 tests and all 21 notebooks pass), with its own `optbench` names renamed;
 nothing there is pushed, and its branch `optibench-rename` still exists.
-After that, `ailigment`'s goal `optbench-symreg`, task S1 (its PLAN.md).
+After that, `entwined`'s goal `optbench-symreg`, task S1 (its PLAN.md).
 
 ## Baseline (2026-10-23, at 693876d)
 
@@ -149,7 +149,7 @@ row "Python compliance". `pytest` takes 1 min 50 s at load 4 to 6.
 
 The user approved both specs (now in DESIGN.md, "Approved spec: bbob and
 classics") and their task lists on 2026-10-17, with the order: classics,
-then BBOB, then the `ailigment` adapters. Downloading RR-6829 (573,076
+then BBOB, then the `entwined` adapters. Downloading RR-6829 (573,076
 bytes, from https://inria.hal.science/inria-00362633/document) and adding
 COCO's Python package as a dev-only dependency are approved too.
 
@@ -159,9 +159,9 @@ COCO's Python package as a dev-only dependency are approved too.
    answers and what the work found are in DESIGN.md ("Python standard"
    under Decisions, the results row, the rejected approach).
 
-2. done (2026-10-17): the same migration for `ailigment` (its PLAN.md).
+2. done (2026-10-17): the same migration for `entwined` (its PLAN.md).
 3. done (2026-10-18, 569f452 to 0cea41b): module `formula` (spec
-   in DESIGN.md, "Approved spec: formula"), asked for by `ailigment`'s
+   in DESIGN.md, "Approved spec: formula"), asked for by `entwined`'s
    approved goal `optbench-symreg` (its DESIGN.md). Pushed at 690f912.
 4. done (2026-10-23, branch `python-compliance`, e2b3b49 to 6635487):
    `/zz-08-python-compliance` passes all 22 checks; the user's decisions

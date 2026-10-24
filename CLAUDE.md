@@ -49,7 +49,7 @@ Before every commit run format, lint, both type checks and the tests above.
   problems), CODEMAP.md (modules, interfaces, line counts), DESIGN.md (spec,
   decisions, rejected approaches, results) and this file (commands, rules).
   Each fact lives in exactly one file.
-- This library never imports `ailigment` or any other optimiser code, and
+- This library never imports `entwined` or any other optimiser code, and
   depends on numpy, pydantic, sympy (for `formula()`, approved
   2026-10-17) and numba (for the network simulations, approved
   2026-10-24) only at run time. numba is imported only in

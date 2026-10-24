@@ -8,7 +8,7 @@ gotchas.
 
 ### Approved spec (the user, 2026-10-16)
 
-The user's request, made in the `ailigment` repo on 2026-10-16: "a separate
+The user's request, made in the `entwined` repo (named `ailigment` until 2026-10-24) on 2026-10-16: "a separate
 benchmarking library which lets me test optimisation algorithms like the
 CGP", based on the optimisation pages of the Virtual Library of Simulation
 Experiments (https://www.sfu.ca/~ssurjano/, Surjanovic and Bingham, Simon
@@ -19,7 +19,7 @@ on parameters: every constant in a formula must be editable, "for example
 y = 2*x*x where x is the input to the function, 2 should be a parameter".
 
 Users and use case: the user, testing optimisation algorithms (CGP-based ones
-from `ailigment`, and any other) on standard test functions with known
+from `entwined`, and any other) on standard test functions with known
 answers, and changing the functions' constants to make variants.
 
 Acceptance criteria, each testable:
@@ -57,23 +57,23 @@ Acceptance criteria, each testable:
    evaluated points, keeps the best value and point so far, and records the
    best-so-far curve (evaluations, best) that a caller can save as CSV. It is
    the only state in the library; problems themselves are pure.
-9. It never imports `ailigment`, and depends on numpy only at run time.
+9. It never imports `entwined`, and depends on numpy only at run time.
    (Changed 2026-10-17 with module `python-standard`, which the user
    approved: pydantic too, for the records the Python standard requires;
-   `ailigment` already depends on it.)
+   `entwined` already depends on it.)
 
 Non-goals for the first version: the emulation, integration and uncertainty
 pages; shifted, rotated or noisy variants (CEC style); constrained or
 multi-objective problems; plotting; GPU arrays; the optimisers themselves
-(beyond a random-search baseline); and the `ailigment` adapters, which live
-in `ailigment/benchmarks/` and get their own specs.
+(beyond a random-search baseline); and the `entwined` adapters, which live
+in `entwined/benchmarks/` and get their own specs.
 
 Constraints: a separate uv project at
 `/Users/jmdm/Documents/projects/code/4xx_dual_pc/optibench` (named
 `optbench` until 2026-10-23), private GitHub repo
-`Jacopo-DM/optibench`; Python >=3.13 (same interpreter as `ailigment`,
+`Jacopo-DM/optibench`; Python >=3.13 (same interpreter as `entwined`,
 which pulls it in); numpy; dev tools as in
-`ailigment` (ruff, pyright strict, pytest); its own four state files and
+`entwined` (ruff, pyright strict, pytest); its own four state files and
 module READMEs; feature branches and the user-level git rules.
 
 Architecture:
@@ -192,10 +192,10 @@ fits it. One commit; the minima are checked numerically as for SFU.
 ### Approved spec: formula (the user, 2026-10-17)
 
 Kind: build (new behaviour). Goal: every optibench problem returns its
-formula as a sympy expression. Users: `ailigment`'s `optbench-symreg`,
+formula as a sympy expression. Users: `entwined`'s `optbench-symreg`,
 which checks whether an evolved formula equals the true one exactly, and
 anyone who wants a function's closed form (sympy can print or simplify
-it). The user chose to keep the formulas here rather than in `ailigment`,
+it). The user chose to keep the formulas here rather than in `entwined`,
 so they stay next to the functions and change with their parameters.
 
 Acceptance criteria:
@@ -241,7 +241,7 @@ for dimensions beyond what each problem allows.
 
 Dependency: sympy 1.14.0 from PyPI (wheel about 6.3 MB) with mpmath 1.3.0
 (about 0.5 MB), in `[project].dependencies`; the user accepted it for this
-purpose in `ailigment`'s spec and chose a required dependency here.
+purpose in `entwined`'s spec and chose a required dependency here.
 
 Architecture: `symbolic.py` (the typed sympy facade: symbols, the
 operations the formulas use, `lambdify`); `formula()` on each problem
@@ -355,9 +355,9 @@ the user as PostScript the same day. None is kept in the repo.
 - Name (2026-10-23, the user's request): the library was renamed from
   `optbench` to `optibench`, the import name too, because a package
   installed under one name and imported under another misleads readers,
-  and `ailigment` was its only user. The local folder was renamed too, with
+  and `entwined` was its only user. The local folder was renamed too, with
   its per-folder Claude state (skill runs, audit record, project folder).
-  One old name stays on purpose: `ailigment`'s goal `optbench-symreg`,
+  One old name stays on purpose: `entwined`'s goal `optbench-symreg`,
   which belongs to that repo. Moving the folder breaks two things that
   hold its absolute path: `.venv` (rebuild it: delete it, then
   `uv sync --locked`) and `.git/hooks/pre-commit`, whose `INSTALL_PYTHON`
@@ -380,7 +380,7 @@ the user as PostScript the same day. None is kept in the repo.
   `pi` is used where the numpy code uses `math.pi`, so the formula is
   exact; `lambdify` turns it back into the same float. The same holds for
   `exp(1)` (Ackley's `e`) and `sqrt(i)` (Griewank). A caller comparing a
-  formula with one built from float constants (ailigment's exact match)
+  formula with one built from float constants (entwined's exact match)
   must turn these exact constants into floats first, or `pi - 3.14159`
   never simplifies to 0. A function that
   takes any arguments is typed as a Protocol with `*columns`, since
@@ -418,7 +418,7 @@ the user as PostScript the same day. None is kept in the repo.
   used to read the module's `LIMIT` on every check, so the test that
   patched `LIMIT` to 0 could, if the running guard woke during that test,
   make the guard call the patched `stop` and end its thread for the rest
-  of the run. ailigment's `benchmarks.memory_guard` was written this way
+  of the run. entwined's `benchmarks.memory_guard` was written this way
   from the start.
 - Adding the formulas took `bowl.py` to 426 lines and
   `many_local_minima_any_d.py` past 400, so they were split by the size
@@ -433,7 +433,7 @@ the user as PostScript the same day. None is kept in the repo.
   each page; they were read from the images and the cited papers.
 - MIT license (the user, 2026-10-16): short and permissive, fits a benchmark
   library others may copy or cite.
-- Python >=3.13 and numpy and pydantic only at run time: `ailigment` (Python 3.13, see its
+- Python >=3.13 and numpy and pydantic only at run time: `entwined` (Python 3.13, see its
   CLAUDE.md for why) pulls this library in, so the floors must not exceed its
   own.
 - Problems are frozen models (frozen dataclasses until 2026-10-17, pydantic
@@ -732,7 +732,7 @@ the user as PostScript the same day. None is kept in the repo.
   3e-8 below Gavana's published -106.7645367198034.
 
 - The random-search baseline (2026-10-17) is `optibench.random_search`, in the
-  package rather than in a script, because the `ailigment` adapters will
+  package rather than in a script, because the `entwined` adapters will
   import it as the result to beat. It is not an optimiser library: one
   function, uniform points through `Tracked`, so `Tracked` stays the only
   state. Points come in batches of 1,000 (one `Tracked` curve row each) and
@@ -743,11 +743,11 @@ the user as PostScript the same day. None is kept in the repo.
   `scripts/` package outside `optibench`; the Python standard's `pytest.ini`
   (`pythonpath = src`, coverage over `src` and `tests`) moved them in (see
   "Python standard"). The package itself never imports them. They write to `__data__/` (git-ignored),
-  as in `ailigment`. The scripts draw no plots, because matplotlib would be a
-  new dependency; the charts so far were drawn with `ailigment`'s
+  as in `entwined`. The scripts draw no plots, because matplotlib would be a
+  new dependency; the charts so far were drawn with `entwined`'s
   environment from the CSVs. The script lived in a session scratch folder,
   so redo it when needed: run from this repo with
-  `PYTHONPATH=.:src ../ailigment/.venv/bin/python <script>`, read
+  `PYTHONPATH=.:src ../entwined/.venv/bin/python <script>`, read
   `__data__/timing.csv` into a horizontal bar chart (one bar per
   `name (d=..)`, a dashed line at the 100 ms budget), and for each
   `scripts.common.every_problem()` take the last row of the 10 curves
@@ -762,7 +762,7 @@ the user as PostScript the same day. None is kept in the repo.
   user's Python standard (`~/.claude/standards/python/core.md`) with the
   template configs unchanged and every value bit for bit the same.
   Non-goals: a Sphinx docs site (the user's `/zz-09-python-docs` prompt),
-  any speed-up, the `ailigment` migration. The user's answers to its four
+  any speed-up, the `entwined` migration. The user's answers to its four
   design questions (each the recommended option):
   - Variants come from a `problem.replace(**changes)` method that rebuilds
     the model through validation, because pydantic's `model_copy(update=...)`
