@@ -203,7 +203,8 @@ budgets in a temporary folder, and boundary tests of their arguments).
 
 ## Other top-level folders
 
-`tools/compress_images.py` (483 lines, a copy of the user's template):
+`docs/logo.svg`: the project logo shown at the top of the README (no
+built docs yet). `tools/compress_images.py` (483 lines, a copy of the user's template):
 compresses PNG and JPEG images under `docs/` and `examples/` and strips
 their metadata; run by pre-commit. `tools/run_notebooks.py` (495, the
 template's): runs `tests/functional/*.ipynb` (none yet) at commit and
