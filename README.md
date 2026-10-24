@@ -1,8 +1,6 @@
 <div align="center">
 
-<img src="docs/logo.svg" alt="optibench logo: a ball resting at the bottom of a ring, with a fading trail, on a cobalt tile" width="160">
-
-# optibench
+# <img src="docs/logo.svg" alt="optibench logo: a ball resting at the bottom of a ring, with a fading trail, on a cobalt tile" width="160"><br>optibench
 
 Test functions for optimisation algorithms, from the SFU Virtual Library of Simulation Experiments
 
