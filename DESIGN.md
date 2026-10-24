@@ -69,7 +69,7 @@ multi-objective problems; plotting; GPU arrays; the optimisers themselves
 in `ailigment/benchmarks/` and get their own specs.
 
 Constraints: a separate uv project at
-`/Users/jmdm/Documents/projects/code/1xx_projects/optibench` (named
+`/Users/jmdm/Documents/projects/code/4xx_dual_pc/optibench` (named
 `optbench` until 2026-10-23), private GitHub repo
 `Jacopo-DM/optibench`; Python >=3.13 (same interpreter as `ailigment`,
 which pulls it in); numpy; dev tools as in
