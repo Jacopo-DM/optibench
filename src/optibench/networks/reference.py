@@ -16,9 +16,6 @@ from .poles import MAX_FORCE, Poles
 STEP = 1e-6
 ITERATIONS = 10_000
 
-# The papers' network step: two RK4 steps of 0.01 s.
-NETWORK_STEP = 0.02
-
 
 def _linearise(
     task: Poles,
@@ -84,6 +81,9 @@ class LinearController:
     def __init__(self, task: Poles) -> None:
         self.task = task
         self.gains = _gains(*_linearise(task))
+
+        # One network step, over which unseen velocities are differenced.
+        self._dt = task.cart.dt * task.cart.substeps
         self._last: NDArray[np.float64] | None = None
 
     def reset(self, n: int) -> None:  # ruff: ignore[unused-method-argument]  # the Policy protocol passes n
@@ -107,7 +107,7 @@ class LinearController:
             self._last = seen
             state = np.empty((len(inputs), len(scale)))
             state[:, ::2] = seen
-            state[:, 1::2] = (seen - last) / NETWORK_STEP
+            state[:, 1::2] = (seen - last) / self._dt
         push: NDArray[np.float64] = np.clip(
             -(state @ self.gains.T) / MAX_FORCE,
             -1.0,
