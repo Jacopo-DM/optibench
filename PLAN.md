@@ -15,7 +15,7 @@ Every task takes a seed and a trial count (the same seed gives the same
 start states, so a network's score repeats), has a solved test, and
 returns its natural reward, negative where the physics gives one.
 
-- `network-core` (done 2026-10-24, de90688 to 911eedc; speed budget 35 s,
+- `network-core` (done 2026-10-24, de90688 to dcd3571; speed budget 35 s,
   not the 10 s below, the user's choice after measuring): optibench scores a
   batch of networks through one batched interface (inputs `(n_nets, n_in)`
   to outputs `(n_nets, n_out)`, a `reset`, and a wrapper for one plain
@@ -174,7 +174,7 @@ COCO's Python package as a dev-only dependency are approved too.
 6. open (the user, 2026-10-23: yes, later): a Sphinx docs site on GitHub
    Pages with `/zz-09-python-docs`.
 
-### Goal `network-core`: done (2026-10-24, de90688 to 911eedc)
+### Goal `network-core`: done (2026-10-24, de90688 to dcd3571)
 
 N1 to N6 built and tested; results in DESIGN.md (rows "network-core N1"
 to "N6"). The spec's speed target of 10 s was not met (28.2 s median);

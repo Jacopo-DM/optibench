@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optibench/__init__.py`.
 
-## `src/optibench` (9077 lines, 46 files)
+## `src/optibench` (9127 lines, 46 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -172,7 +172,7 @@ it uses only `model`. `__init__.py`. Order: `problem` is the leaf;
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (2607 lines, 23 files)
+## `tests` (2688 lines, 23 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
