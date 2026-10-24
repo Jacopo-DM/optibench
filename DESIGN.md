@@ -299,7 +299,10 @@ Tasks:
   as in the papers (the user, 2026-10-24: -1..1). Score = network steps
   balanced, budget 100,000; solved = the full budget. Trial 0 starts
   from the published state; later trials draw x, x', the first angle and
-  its velocity uniformly from the seed within half of each input bound.
+  its velocity uniformly from the seed within a quarter of each input
+  scale (the user, 2026-10-24, changed from half: at half the linear
+  reference lost 30% of double-pole starts, at a quarter 2%, at a tenth
+  none).
 - `DoublePole(velocities=False)` also gives Gruau, Whitley and Pyeatt's
   (1996) damping score over 1,000 steps as Stanley and Miikkulainen (2002,
   eq. 3 and 4) state it, F = 0.1 t/1000 + 0.9 f2, and their solution
@@ -314,7 +317,9 @@ this Mac, excluding the policy's own time, checked by `scripts.timing`.
 Tests run the same code uncompiled (`NUMBA_DISABLE_JIT=1`, set in
 `tests/conftest.py`) so coverage sees it.
 
-Proof (the user, 2026-10-24: reference solutions): one network step
+Proof (the user, 2026-10-24: reference solutions; the controller is
+`networks.LinearController`, in the package because `scripts.timing`
+needs it too): one network step
 equals two hand-computed RK4 steps of the appendix equations to 1e-12; a
 hand-built 2-2-1 network solves XOR; a linear state-feedback controller
 (gains from the linearised equations) balances both velocity variants
@@ -865,6 +870,7 @@ optibench, and what was decided:
 | Formulas F3: many local minima (16) (`tests/test_formula.py`, as F1) | formula against numpy | all 41 new problem variants equal to rtol 1e-12, atol 1e-10 | suite 1693 tests, 9.4 s without coverage at load average 21; the first formula test pays sympy's import (3.3 s under that load), every other formula test under 0.05 s |
 | Formulas F2: plate (5), steep (3) and valley (4) (`tests/test_formula.py`, as F1) | formula against numpy | all 32 new problem variants equal to rtol 1e-12, atol 1e-10; Booth prints as `(x1 + 2.0*x2 - 7.0)**2 + (2.0*x1 + x2 - 5.0)**2` | suite 1652 tests, about 6 s |
 | Formulas F1: the 9 bowl functions (`tests/test_formula.py`, d = 1 to 6, 26 points each, 2026-10-17) | formula against numpy | all 42 problem variants equal to rtol 1e-12, atol 1e-10 | suite 1578 to 1620 tests, about 5 s either way |
+| network-core N4, pole tasks (2026-10-24) | the linear reference (discrete LQR of the linearised cart, unit weights; velocities differenced from the last two observations when unseen) | 100,000 steps from the published start in all four variants, compiled, about 3 s each at n = 1; 4 random trials of 1,000 steps won at seed 1 in all four; at seed 0 one double-pole start is lost; a constant zero push fails every variant | 14 tests; the 100,000-step check runs in a child process with numba on (13 s) |
 | network-core N3, cart dynamics (2026-10-24) | one network step against an independent RK4 of Gomez et al. (2008) Appendix A; speed of the compiled step | equal to 1e-12 for one and two poles; double pole compiled, 1 thread 477 ns per cart-step, 8 threads 241 ns at load 12; one cart 1.8 us a step (serial kernel), where the parallel one cost 85 us | 1,000 networks on 100,000 steps: about 48 s on one core, 24 s at load 12 on 8; under 10 s needs about 5 free cores (N6 measures it) |
 | network-core N2, `TrackedTask` (2026-10-24) | acceptance tests | one evaluation per network per trial; best score and the first solving evaluation (5 after a batch of 3 and a solving batch of 2 over 2 trials) kept across calls | 3 tests, 100% branch coverage |
 | network-core N1, XOR (2026-10-24) | acceptance tests | a hand-built 2-2-1 sigmoid network scores 15.9985 of 16 and is solved; a batch of 3 and `single` score alike over 2 trials; constant 0.5 scores 4, not solved; wrong shapes and NaN refused | 11 tests, 100% branch coverage of `networks/` |
@@ -899,6 +905,12 @@ optibench, and what was decided:
 | Random-search baseline, all 49 by `scripts.baseline` (10 seeds of 10,000 points, d = 10 where free, Powell d = 8, 2026-10-17) | median final value minus the minimum | 1-D: about 1e-6 (Forrester, Gramacy and Lee); 2-D: 1e-4 to 10 (Cross-in-Tray 3e-4, Branin 4e-3, Eggholder 16); d = 10: Sphere 13, Rastrigin 72, Rosenbrock 1.1e4, Perm 0 2e14, Perm d, beta 2e15 | the reference an optimiser must beat at the same budget; Michalewicz d = 10 reaches -4.8 of -9.66, Shekel -3.2 of -10.54 |
 
 ## Gotchas
+
+- The cart's Coulomb friction (`0.0005 * sign(x')`) jumps at zero speed,
+  so linearising the cart by finite differences at rest with friction on
+  gives nonsense (A[0, 1] came out 0.0037 instead of 0.02) and a regulator
+  that fails in 8 steps. `networks/reference.py` linearises with the
+  cart's friction off (2026-10-24).
 
 - Pydantic's lax integer parsing takes integral decimal text (`"5.0"`,
   `"0.0"`), which `int()` and argparse's `type=int` refuse. Flags parsed

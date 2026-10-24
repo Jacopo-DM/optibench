@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optibench/__init__.py`.
 
-## `src/optibench` (8519 lines, 43 files)
+## `src/optibench` (8849 lines, 45 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -158,14 +158,18 @@ network), `task.py` (`Task`, the frozen base with `n_inputs`,
 `compiled_parallel`, `rows`), `cart.py` (`Cart` with the constants of
 Gomez et al. 2008, `Cart.single()`, `Cart.double()`, and
 `advance(states, forces, cart)`: one network step of RK4 in place,
-parallel from `PARALLEL_FROM` carts), `tracked.py` (`TrackedTask(task)`:
+parallel from `PARALLEL_FROM` carts), `poles.py` (`Poles`, the shared
+simulation with `velocities`, `start_angle`, `steps`, `scale`,
+`start`, `observe`, `run`; `SinglePole`, `DoublePole`),
+`reference.py` (`LinearController(task)`, the regulator that balances
+all four, used by tests and `scripts.timing`), `tracked.py` (`TrackedTask(task)`:
 `evaluations`, `best_score`, `solved_at`, `curve`), `xor.py` (`Xor`));
 it uses only `model`. `__init__.py`. Order: `problem` is the leaf;
 `references` and `known_minima` use only `problem`; the group modules use
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (2326 lines, 21 files)
+## `tests` (2465 lines, 22 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
@@ -184,7 +188,8 @@ run past 2 GB of peak memory), `test_memory_guard.py`,
 `test_registry_and_tracking.py` (with the Hypothesis boundary test of
 `make`), `test_networks_xor.py` (the policy interface and XOR),
 `test_networks_tracked.py`, `test_networks_cart.py` (one step against
-an independent RK4 of Appendix A), `test_baseline.py`, `test_scripts.py` (both scripts on small
+an independent RK4 of Appendix A), `test_networks_poles.py` (the four
+tasks, the reference, and 100,000 compiled steps in a child process), `test_baseline.py`, `test_scripts.py` (both scripts on small
 budgets in a temporary folder, and boundary tests of their arguments).
 `conftest.py` also loads the Hypothesis profile and sets
 `NUMBA_DISABLE_JIT=1`. Depends on: `optibench`

@@ -210,7 +210,7 @@ Tier 2, in order:
   steps computed by hand from Gomez's Appendix A to 1e-12, for one and two
   poles. Risk medium (numba with strict typing, and coverage of compiled
   code); about 200 lines, one new dependency.
-- N4. `SinglePole` and `DoublePole` with `velocities`, `start_angle`,
+- N4. done (2026-10-24). `SinglePole` and `DoublePole` with `velocities`, `start_angle`,
   inputs, force, trials and seeds (`networks/poles.py`, its tests).
   Verify: a linear state-feedback controller (gains from the linearised
   equations, found once and written into the test with how) balances both
