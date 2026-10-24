@@ -30,14 +30,15 @@ class Single:
     Parameters
     ----------
     network
-        Maps an input vector ``(n_in,)`` to an output vector ``(n_out,)``.
+        Maps an input vector ``(n_in,)`` to an output vector ``(n_out,)``,
+        or to a number when there is one output.
     on_reset
         Called before every trial; clears the network's state.
     """
 
     def __init__(
         self,
-        network: Callable[[NDArray[np.float64]], NDArray[np.float64]],
+        network: Callable[[NDArray[np.float64]], NDArray[np.float64] | float],
         on_reset: Callable[[], object] | None,
     ) -> None:
         self._network = network
@@ -65,11 +66,12 @@ class Single:
         numpy.ndarray
             Its output as a batch of one, shaped ``(1, n_out)``.
         """
-        return np.asarray(self._network(inputs[0]), dtype=np.float64)[None]
+        output = np.asarray(self._network(inputs[0]), dtype=np.float64)
+        return np.atleast_1d(output)[None]
 
 
 def single(
-    network: Callable[[NDArray[np.float64]], NDArray[np.float64]],
+    network: Callable[[NDArray[np.float64]], NDArray[np.float64] | float],
     reset: Callable[[], object] | None = None,
 ) -> Single:
     """Wrap one network as a policy, so ``task.evaluate`` can score it.

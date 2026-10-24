@@ -124,7 +124,7 @@ class Task(Model, ABC):
         Raises
         ------
         ValueError
-            If the outputs have the wrong shape or hold NaN.
+            If the outputs have the wrong shape or hold NaN or infinity.
         """
         outputs = np.asarray(policy(inputs), dtype=np.float64)
         expected = (len(inputs), self.n_outputs)
@@ -132,8 +132,9 @@ class Task(Model, ABC):
             got = outputs.shape
             msg = f"the policy must return shape {expected}, got {got}"
             raise ValueError(msg)
-        if np.isnan(outputs).any():
-            rows = np.flatnonzero(np.isnan(outputs).any(axis=1)).tolist()
-            msg = f"the policy returned NaN for networks {rows}"
+        bad = ~np.isfinite(outputs)
+        if bad.any():
+            rows = np.flatnonzero(bad.any(axis=1)).tolist()
+            msg = f"the policy returned NaN or infinity for networks {rows}"
             raise ValueError(msg)
         return outputs

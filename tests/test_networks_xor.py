@@ -109,3 +109,13 @@ def test_nan_output_is_refused() -> None:
 def test_sizes_must_be_positive(n: int, trials: int) -> None:
     with pytest.raises(ValueError, match="at least 1"):
         Xor().evaluate(Batch(), n=n, trials=trials)
+
+
+def test_single_accepts_a_number() -> None:
+    assert Xor().evaluate(single(lambda _: 0.5)).score == pytest.approx([4.0])
+
+
+@pytest.mark.parametrize("bad", [np.inf, -np.inf])
+def test_infinite_output_is_refused(bad: float) -> None:
+    with pytest.raises(ValueError, match="NaN or infinity"):
+        Xor().evaluate(Batch(np.array([[bad]])))
