@@ -15,21 +15,22 @@ Every task takes a seed and a trial count (the same seed gives the same
 start states, so a network's score repeats), has a solved test, and
 returns its natural reward, negative where the physics gives one.
 
-- `network-core` (approved 2026-10-24): optibench scores a batch of
-  networks through one batched interface (inputs `(n_nets, n_in)` to
-  outputs `(n_nets, n_out)`, a `reset`, and a wrapper for one plain
-  callable) on XOR and on single and double pole balancing, each with
-  and without velocities, with Gruau's damping score and the 625-start
+- `network-core` (done 2026-10-24, de90688 to 911eedc; speed budget 35 s,
+  not the 10 s below, the user's choice after measuring): optibench scores a
+  batch of networks through one batched interface (inputs `(n_nets, n_in)`
+  to outputs `(n_nets, n_out)`, a `reset`, and a wrapper for one plain
+  callable) on XOR and on single and double pole balancing, each with and
+  without velocities, with Gruau's damping score and the 625-start
   generalisation test for double pole without velocities; and a
   `Tracked`-style counter that records evaluations, the best score so far
   and the evaluation at which the task was first solved, so a caller can
-  report evaluations to solve over 20 seeds. Success: one
-  simulator step equals a hand-computed step of the published equations to
-  1e-12; a hand-built 2-2-1 network solves XOR; a linear controller
-  balances both velocity variants for the full budget (100,000 steps for
-  double pole); a recurrent reference controller that differences its last
-  two observations balances both variants without velocities; 1,000
-  networks on 100,000 double-pole steps run in under 10 s on this Mac.
+  report evaluations to solve over 20 seeds. Success: one simulator step
+  equals a hand-computed step of the published equations to 1e-12; a
+  hand-built 2-2-1 network solves XOR; a linear controller balances both
+  velocity variants for the full budget (100,000 steps for double pole); a
+  recurrent reference controller that differences its last two observations
+  balances both variants without velocities; 1,000 networks on 100,000
+  double-pole steps run in under 10 s on this Mac.
 - `network-fit` (approved 2026-10-24): fit-a-function for any
   registered problem (inputs scaled to -1..1, targets to 0..1, score =
   squared error / variance of the sample, so 0 is perfect and 1 is the
@@ -55,17 +56,17 @@ returns its natural reward, negative where the physics gives one.
   robot in tests; a scripted route reaches the goal; a controller that
   steers straight at the goal ends in the dead end, which shows the maze
   is deceptive.
-- `network-ballkeeper` (approved 2026-10-24): ball keeping (no
-  paper; MultiNEAT's `ball_keeper.py` was the only source): a floor and
-  three walls under gravity, an agent that runs and jumps when grounded,
-  a ball dropped with a random x and x velocity, elastic circle-circle and
-  circle-wall collisions in numpy, with constants of optibench's own from
-  the equations (the user, 2026-10-24: papers only), then checked against
-  the old example's numbers afterwards. Score = steps until the ball touches the floor, capped at
-  15,000, averaged over 20 starts; solved at 10,000. Success: a ball
-  alone keeps its energy through 100 bounces to 1e-9; a scripted agent
-  that stays under the ball and jumps on time reaches 10,000 steps; an
-  agent that stands still scores the ball's first fall time.
+- `network-ballkeeper` (approved 2026-10-24): ball keeping (no paper;
+  MultiNEAT's `ball_keeper.py` was the only source): a floor and three walls
+  under gravity, an agent that runs and jumps when grounded, a ball dropped
+  with a random x and x velocity, elastic circle-circle and circle-wall
+  collisions in numpy, with constants of optibench's own from the equations
+  (the user, 2026-10-24: papers only), then checked against the old
+  example's numbers afterwards. Score = steps until the ball touches the
+  floor, capped at 15,000, averaged over 20 starts; solved at 10,000.
+  Success: a ball alone keeps its energy through 100 bounces to 1e-9; a
+  scripted agent that stays under the ball and jumps on time reaches 10,000
+  steps; an agent that stands still scores the ball's first fall time.
 
 ## Current state (2026-10-24)
 
@@ -131,18 +132,13 @@ returns its natural reward, negative where the physics gives one.
   0.13.4 too (2026-10-24, the user's go-ahead); CI passed and it was
   merged by rebase (af12724).
 
-Next step: `ailigment` moves its pin (690f912, still the package
-`optbench`), its dependency name and its imports to `optibench` at 693876d;
-a separate session in that repo started on it on 2026-10-24. That is work in
-the `ailigment` repo (226 uses in 18 files on 2026-10-23): `pyproject.toml`
-lines 49 and 54, the imports, the old folder path in its PLAN.md:382, and
-names of its own that hold the old word (`src/benchmarks/optbench_symreg.py`
-and `optbench_table.py`, `tests/test_optbench_symreg.py` and
-`test_optbench_table.py`, `tests/functional/symreg.ipynb`, the goal
-`optbench-symreg`); whether those get renamed is the user's call. It was on
-branch `cgp-engine` that day, so check it for other work first. After that,
-`ailigment`'s goal `optbench-symreg`, task S1 (its PLAN.md).
-No optibench module is open.
+Next step: the spec of goal `network-fit` (the next goal in order), with
+`/zz-02-project-plan`; `network-core` is done on branch `network-core`. In
+`ailigment` (2026-10-24, its own session): the move to `optibench` at
+693876d is merged into its branch `better-search` (f2366b3 on the Mac; 384
+tests and all 21 notebooks pass), with its own `optbench` names renamed;
+nothing there is pushed, and its branch `optibench-rename` still exists.
+After that, `ailigment`'s goal `optbench-symreg`, task S1 (its PLAN.md).
 
 ## Baseline (2026-10-23, at 693876d)
 
@@ -178,59 +174,11 @@ COCO's Python package as a dev-only dependency are approved too.
 6. open (the user, 2026-10-23: yes, later): a Sphinx docs site on GitHub
    Pages with `/zz-09-python-docs`.
 
-### Goal `network-core` (spec approved 2026-10-24, task list proposed)
+### Goal `network-core`: done (2026-10-24, de90688 to 911eedc)
 
-Every task: tests first, then the code; full suite, ruff, mypy and
-pyright green before each commit; README, CODEMAP.md and DESIGN.md results
-updated in the same commit. All files are new, so no existing behaviour
-needs characterisation tests; the 83 functions must keep passing.
-
-Tier 1, the walking skeleton:
-
-- N1. done (2026-10-24). `optibench.networks` with `Policy`, `single`, `Task`, `Scores` and
-  `Xor` (`networks/__init__.py`, `policy.py`, `task.py`, `xor.py`,
-  `tests/test_networks_xor.py`, exports in `optibench/__init__.py`).
-  Serves: the interface and the XOR criterion. Verify: a hand-built
-  2-2-1 network scores 16 and is solved; a constant network is not; a
-  wrapped single callable and a batch of the same network score alike.
-  Risk low; about 250 lines, one new concept (a task).
-- N2. done (2026-10-24). `TrackedTask` (`networks/tracked.py`, its tests). Serves:
-  evaluations to solve. Verify: counts one per network per trial, keeps
-  the best score and the first solving evaluation across calls. Risk low;
-  about 80 lines.
-
-Tier 2, in order:
-
-- N3. done (2026-10-24). numba as a run-time dependency (`uv add numba`, 43 MB, approved
-  2026-10-24) behind one typed module (`networks/compiled.py`: the only
-  import of numba, its decorators wrapped so mypy and pyright stay strict),
-  `NUMBA_DISABLE_JIT=1` in `tests/conftest.py`, and the cart dynamics
-  (`networks/cart.py`: Wieland's equations for N poles, RK4). CLAUDE.md's
-  dependency rule names numba. Verify: one network step equals two RK4
-  steps computed by hand from Gomez's Appendix A to 1e-12, for one and two
-  poles. Risk medium (numba with strict typing, and coverage of compiled
-  code); about 200 lines, one new dependency.
-- N4. done (2026-10-24). `SinglePole` and `DoublePole` with `velocities`, `start_angle`,
-  inputs, force, trials and seeds (`networks/poles.py`, its tests).
-  Verify: a linear state-feedback controller (gains from the linearised
-  equations, found once and written into the test with how) balances both
-  velocity variants for 100,000 steps; a recurrent controller that
-  differences its last two observations balances both variants without
-  them; a zero network fails; the same seed repeats every trial. Risk
-  medium to high (finding controllers good for 100,000 steps); about 300
-  lines.
-- N5. done (2026-10-24, with Gruau's own ranges, scales and capped
-  damping from the 1996 paper the user supplied). Gruau's damping score
-  and the 625-start solution test for
-  `DoublePole(velocities=False)`. Verify: the score of a hand-made
-  trajectory equals eq. 3 and 4 computed by hand; the recurrent reference
-  passes at least 200 of 625. Risk medium (the start ranges are open);
-  about 120 lines.
-- N6. done (2026-10-24, as `scripts/pole_timing.py`, its own script
-  because it takes minutes; median 28.2 s, budget 35 s, the user's). The
-  speed check in `scripts/timing.py`: 1,000 copies of the linear
-  reference on 100,000 double-pole steps, compiled, under 10 s, run 5
-  times for the median and spread. Risk low; about 40 lines.
+N1 to N6 built and tested; results in DESIGN.md (rows "network-core N1"
+to "N6"). The spec's speed target of 10 s was not met (28.2 s median);
+the user set a 35 s budget instead.
 
 Tier 3, not planned: any pole variant beyond the four in the spec.
 
