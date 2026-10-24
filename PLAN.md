@@ -219,7 +219,9 @@ Tier 2, in order:
   them; a zero network fails; the same seed repeats every trial. Risk
   medium to high (finding controllers good for 100,000 steps); about 300
   lines.
-- N5. Gruau's damping score and the 625-start solution test for
+- N5. done (2026-10-24, with Gruau's own ranges, scales and capped
+  damping from the 1996 paper the user supplied). Gruau's damping score
+  and the 625-start solution test for
   `DoublePole(velocities=False)`. Verify: the score of a hand-made
   trajectory equals eq. 3 and 4 computed by hand; the recurrent reference
   passes at least 200 of 625. Risk medium (the start ranges are open);
@@ -228,9 +230,7 @@ Tier 2, in order:
   reference on 100,000 double-pole steps, compiled, under 10 s, run 5
   times for the median and spread. Risk low; about 40 lines.
 
-Tier 3, not planned: the start ranges from Gruau et al. (1996) once that
-paper is found (the open question in the spec); any pole variant beyond
-the four in the spec.
+Tier 3, not planned: any pole variant beyond the four in the spec.
 
 ## Open questions
 

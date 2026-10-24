@@ -292,9 +292,10 @@ Tasks:
   need. RK4 with 0.01 s; one network step is 0.02 s (two RK4 steps).
   `start_angle` is a field, default 4 deg from Gomez (NEAT's paper used
   1 deg; the user, 2026-10-24); the second pole starts vertical. Inputs:
-  x / 2.4, x' / 2, each angle / its failure angle, each angular velocity
-  / 2 (optibench's own scale; the papers only say "scaled to [-1, 1]");
-  without velocities only x and the angles. Output: one value in -1..1
+  x / 2.4, x' / 1.5 m/s, each angle / its failure angle, each angular
+  velocity / 115 deg/s, from Gruau, Whitley and Pyeatt (1996, section 3;
+  the user, 2026-10-24, replacing optibench's own 2 and 2, chosen before
+  the paper was found); without velocities only x and the angles. Output: one value in -1..1
   (clipped), force = 10 N times it, and at least 10/256 N in magnitude
   as in the papers (the user, 2026-10-24: -1..1). Score = network steps
   balanced, budget 100,000; solved = the full budget. Trial 0 starts
@@ -303,12 +304,17 @@ Tasks:
   scale (the user, 2026-10-24, changed from half: at half the linear
   reference lost 30% of double-pole starts, at a quarter 2%, at a tenth
   none).
-- `DoublePole(velocities=False)` also gives Gruau, Whitley and Pyeatt's
-  (1996) damping score over 1,000 steps as Stanley and Miikkulainen (2002,
-  eq. 3 and 4) state it, F = 0.1 t/1000 + 0.9 f2, and their solution
-  test: 100,000 steps from the start state and at least 200 of 625 start
-  states (each of x, x', the first angle and its velocity at 0.05, 0.25,
-  0.5, 0.75 and 0.95 of its range) balanced for 1,000 steps.
+- `DoublePole(gruau=True)` gives Gruau, Whitley and Pyeatt's (1996,
+  section 4.1) damping score over 1,000 steps, F = 0.1 t/1000 + 0.9 f2,
+  with f2 = 0.75 over the sum of the four scaled inputs of the cart and
+  the long pole in absolute value across the last 100 steps, capped at 1
+  (Stanley and Miikkulainen 2002, eq. 3 and 4, state neither the scaling
+  nor the cap), and their solution test: 100,000 steps from the start
+  state and at least 200 of 625 start states balanced for 1,000 steps,
+  each of x, x', the first angle and its velocity at 0.05, 0.25, 0.5,
+  0.75 and 0.95 of +-2.16 m, +-1.35 m/s, +-3.6 deg and +-8.6 deg/s
+  (section 4.3), the second pole upright. The test runs only when a
+  network balanced all 1,000 steps, as Gruau ran it only on champions.
 
 Speed (the user, 2026-10-24: keep 10 s, add numba): the cart simulation
 is compiled with numba (run-time dependency, 43 MB on macOS with
@@ -336,10 +342,9 @@ out, no state, and recurrent networks break it); one network per call
 integration (the papers use RK4); plain numpy (about 80 s for the worst
 case above; the user chose numba).
 
-Open: the ranges of the 625 start states come from Gruau et al. (1996),
-which is not downloaded; NEAT's paper says only "scaled to the range of
-the input variable". Until they are found, the ranges are the input
-bounds above, and the test says so.
+Sources: Gomez et al. (2008) and Stanley and Miikkulainen (2002),
+downloaded with approval on 2026-10-24; Gruau et al. (1996), supplied by
+the user as PostScript the same day. None is kept in the repo.
 
 ## Decisions
 
@@ -870,6 +875,7 @@ optibench, and what was decided:
 | Formulas F3: many local minima (16) (`tests/test_formula.py`, as F1) | formula against numpy | all 41 new problem variants equal to rtol 1e-12, atol 1e-10 | suite 1693 tests, 9.4 s without coverage at load average 21; the first formula test pays sympy's import (3.3 s under that load), every other formula test under 0.05 s |
 | Formulas F2: plate (5), steep (3) and valley (4) (`tests/test_formula.py`, as F1) | formula against numpy | all 32 new problem variants equal to rtol 1e-12, atol 1e-10; Booth prints as `(x1 + 2.0*x2 - 7.0)**2 + (2.0*x1 + x2 - 5.0)**2` | suite 1652 tests, about 6 s |
 | Formulas F1: the 9 bowl functions (`tests/test_formula.py`, d = 1 to 6, 26 points each, 2026-10-17) | formula against numpy | all 42 problem variants equal to rtol 1e-12, atol 1e-10 | suite 1578 to 1620 tests, about 5 s either way |
+| network-core N5, Gruau's score and test (2026-10-24) | the damping score against eq. 3 and 4 worked by hand; the reference on the 625 starts, compiled | equal to 1e-12; the reference without velocities wins 535 of 625 on Gruau's ranges (167 on the full input scales, the spec's fallback before the paper was found; Gruau reports 569 on average with velocities) and passes the solution test | the compiled child test now takes about 45 s at load 8 |
 | network-core N4, pole tasks (2026-10-24) | the linear reference (discrete LQR of the linearised cart, unit weights; velocities differenced from the last two observations when unseen) | 100,000 steps from the published start in all four variants, compiled, about 3 s each at n = 1; 4 random trials of 1,000 steps won at seed 1 in all four; at seed 0 one double-pole start is lost; a constant zero push fails every variant | 14 tests; the 100,000-step check runs in a child process with numba on (13 s) |
 | network-core N3, cart dynamics (2026-10-24) | one network step against an independent RK4 of Gomez et al. (2008) Appendix A; speed of the compiled step | equal to 1e-12 for one and two poles; double pole compiled, 1 thread 477 ns per cart-step, 8 threads 241 ns at load 12; one cart 1.8 us a step (serial kernel), where the parallel one cost 85 us | 1,000 networks on 100,000 steps: about 48 s on one core, 24 s at load 12 on 8; under 10 s needs about 5 free cores (N6 measures it) |
 | network-core N2, `TrackedTask` (2026-10-24) | acceptance tests | one evaluation per network per trial; best score and the first solving evaluation (5 after a batch of 3 and a solving batch of 2 over 2 trials) kept across calls | 3 tests, 100% branch coverage |

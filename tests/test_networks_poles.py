@@ -85,7 +85,9 @@ def test_later_starts_repeat_and_stay_in_range() -> None:
 
 
 def test_observations_are_scaled() -> None:
-    state = np.array([[1.2, 1.0, math.radians(18), 1.0, math.radians(-9), 2]])
+    # Gruau's scales: 2.4 m, 1.5 m/s, 36 deg and 115 deg/s map to 1.
+    deg = math.radians
+    state = np.array([[1.2, 0.75, deg(18), deg(57.5), deg(-9), deg(115)]])
     np.testing.assert_allclose(
         DoublePole().observe(state),
         [[0.5, 0.5, 0.5, 0.5, -0.25, 1.0]],
@@ -127,6 +129,10 @@ def test_reference_balances_the_full_budget_compiled() -> None:
         "DoublePole(), DoublePole(velocities=False)):\n"
         "    s = task.evaluate(LinearController(task))\n"
         "    print(int(s.score[0]), bool(s.solved[0]))\n"
+        "task = DoublePole(velocities=False, gruau=True)\n"
+        "reference = LinearController(task)\n"
+        "print(int(task.generalisation(reference, 1)[0]))\n"
+        "print(bool(task.evaluate(reference).solved[0]))\n"
     )
     env = {k: v for k, v in os.environ.items() if k != "NUMBA_DISABLE_JIT"}
     done = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true]  # fixed arguments
@@ -136,4 +142,8 @@ def test_reference_balances_the_full_budget_compiled() -> None:
         env=env,
         check=True,
     )
-    assert done.stdout.split("\n")[:4] == ["100000 True"] * 4
+    lines = done.stdout.split("\n")
+    assert lines[:4] == ["100000 True"] * 4
+
+    # Gruau's solution test: 535 of 625 starts, and so solved.
+    assert lines[4:6] == ["535", "True"]

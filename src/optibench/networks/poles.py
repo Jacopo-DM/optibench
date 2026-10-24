@@ -4,6 +4,7 @@ The four tasks of Gomez, Schmidhuber and Miikkulainen (2008, section 5.3),
 on the cart of ``cart.py``.
 """
 
+import itertools
 import math
 from abc import abstractmethod
 from typing import override
@@ -22,14 +23,28 @@ MAX_FORCE = 10.0
 # pushing with exactly zero.
 MIN_FORCE = MAX_FORCE / 256
 
-# optibench's own scales: the papers say only "scaled to [-1, 1]".
-SPEED_SCALE = 2.0
-SPIN_SCALE = 2.0
+# Gruau, Whitley and Pyeatt (1996, section 3): cart speeds of 1.5 m/s
+# and pole speeds of 115 deg/s map to an input of 1, as do the track's end
+# and the failure angle.
+SPEED_SCALE = 1.5
+SPIN_SCALE = math.radians(115)
 
 # Later trials start within this fraction of each input scale (the user,
 # 2026-10-24); at half, even the linear reference lost 30% of double-pole
 # starts.
 START_SPREAD = 0.25
+
+# Gruau, Whitley and Pyeatt (1996), as Stanley and Miikkulainen (2002,
+# section 4.3.3) state it: the damping score over 1,000 steps, its window
+# of 100, and the solution test of 625 starts, 200 of which must balance.
+GRUAU_STEPS = 1_000
+GRUAU_WINDOW = 100
+GRID = (0.05, 0.25, 0.5, 0.75, 0.95)
+GENERALISE = 200
+
+# The intervals of the 625 starts for x, x', theta_1 and theta_1' (Gruau
+# et al. 1996, section 4.3); the second pole always starts upright.
+INTERVALS = np.array([2.16, 1.35, math.radians(3.6), math.radians(8.6)])
 
 
 class Poles(Task):
@@ -127,10 +142,16 @@ class Poles(Task):
         policy: Policy,
         states: NDArray[np.float64],
         steps: int,
+        offsets: NDArray[np.float64] | None = None,
     ) -> NDArray[np.int64]:
         """Run every cart from ``states`` for up to ``steps`` network steps.
 
         ``states`` is advanced in place; a failed cart stays as it fell.
+        ``offsets``, shaped ``(window, n)``, receives the sum of each live
+        cart's first four inputs in absolute value (x, x', theta_1,
+        theta_1', each scaled as an input) after every step, step
+        ``i`` in row ``i % window``, so it ends holding each cart's last
+        ``window`` balanced steps.
 
         Returns
         -------
@@ -141,7 +162,7 @@ class Poles(Task):
         balanced = np.zeros(n, dtype=np.int64)
         alive = np.ones(n, dtype=np.bool_)
         limit = math.radians(self.failure_angle)
-        for _ in range(steps):
+        for step in range(steps):
             push = np.clip(self._act(policy, self.observe(states))[:, 0], -1, 1)
             force = MAX_FORCE * push
             small = np.abs(force) < MIN_FORCE
@@ -150,6 +171,10 @@ class Poles(Task):
             moving = states[live]
             advance(moving, force[live], self.cart)
             states[live] = moving
+            if offsets is not None:
+                offsets[step % len(offsets), live] = np.abs(
+                    moving[:, :4] / self.scale[:4],
+                ).sum(axis=1)
             alive[live] = (np.abs(moving[:, 0]) <= TRACK) & np.all(
                 np.abs(moving[:, 2::2]) <= limit,
                 axis=1,
@@ -188,8 +213,24 @@ class SinglePole(Poles):
 class DoublePole(Poles):
     """Two poles (half lengths 0.5 m and 0.05 m) on one cart.
 
-    A pole fails at 36 deg.
+    A pole fails at 36 deg. With ``gruau``, the score is Gruau's damping
+    score instead, ``0.1 * t / 1000 + 0.9 * f2`` over 1,000 steps, where
+    ``t`` is the steps balanced and ``f2`` is 0 below 100 steps, else
+    0.75 over the sum of ``|x| + |x'| + |theta_1| + |theta_1'|`` across
+    the last 100 balanced steps, each scaled as an input, and at most 1
+    (Gruau et al. 1996, section 4.1; Stanley and Miikkulainen 2002 state
+    neither the scaling nor the cap); and
+    solved means Gruau's solution test: ``steps`` balanced from the start
+    and at least 200 of the 625 starts of ``generalisation``. The test
+    runs only when some network balanced all 1,000 steps.
+
+    Parameters
+    ----------
+    gruau
+        Score and solve the task as Gruau et al. (1996) did.
     """
+
+    gruau: bool = False
 
     @property
     @override
@@ -200,3 +241,49 @@ class DoublePole(Poles):
     @override
     def failure_angle(self) -> float:
         return 36.0
+
+    def generalisation(self, policy: Policy, n: int) -> NDArray[np.int64]:
+        """Count the starts of Gruau's 625 that each network balances.
+
+        Each of x, x', the first angle and its velocity takes 0.05, 0.25,
+        0.5, 0.75 and 0.95 of its interval in ``INTERVALS`` (Gruau et al.
+        1996, section 4.3: +-2.16 m, +-1.35 m/s, +-3.6 deg, +-8.6 deg/s),
+        so x takes -1.944, -1.08, 0, 1.08 and 1.944 m; every start runs
+        1,000 steps.
+
+        Returns
+        -------
+        numpy.ndarray
+            How many of the 625 starts each network balanced, ``(n,)``.
+        """
+        wins = np.zeros(n, dtype=np.int64)
+        for start in itertools.product(GRID, repeat=4):
+            states = np.zeros((n, len(self.scale)))
+            states[:, :4] = INTERVALS * (2 * np.array(start) - 1)
+            policy.reset(n)
+            wins += self.run(policy, states, GRUAU_STEPS) == GRUAU_STEPS
+        return wins
+
+    @override
+    def _trial(
+        self,
+        policy: Policy,
+        n: int,
+        rng: np.random.Generator,
+        trial: int,
+    ) -> tuple[NDArray[np.float64], NDArray[np.bool_]]:
+        if not self.gruau:
+            return super()._trial(policy, n, rng, trial)
+        start = self.start(n, rng, trial)
+        offsets = np.zeros((GRUAU_WINDOW, n))
+        balanced = self.run(policy, start.copy(), GRUAU_STEPS, offsets)
+        damping = np.zeros(n)
+        long = balanced >= GRUAU_WINDOW
+        damping[long] = np.minimum(1.0, 0.75 / offsets[:, long].sum(axis=0))
+        score = 0.1 * balanced / GRUAU_STEPS + 0.9 * damping
+        solved = np.zeros(n, dtype=np.bool_)
+        if np.any(balanced == GRUAU_STEPS):
+            policy.reset(n)
+            full = self.run(policy, start, self.steps) == self.steps
+            solved = full & (self.generalisation(policy, n) >= GENERALISE)
+        return score, solved

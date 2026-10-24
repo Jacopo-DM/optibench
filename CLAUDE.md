@@ -18,7 +18,7 @@ All commands run from the repo root with uv (Python 3.13).
 | Type check (strict, no `Any`; the one the Stop hook runs) | `uv run mypy .` |
 | Type check as the editor does (strict, `pyrightconfig.json`) | `uv run pyright` |
 | Advisory type check (`ty.toml`; never blocks, 2 known numpy-stub findings in PLAN.md) | `uv run --locked ty check` |
-| Tests, with 100% branch coverage over `src` and `tests` enforced by `pytest.ini`, under the 2 GB memory watchdog (about 2 min at load 4 to 6, most of it the formula test's sympy work; run one file with the command below while working) | `uv run pytest` |
+| Tests, with 100% branch coverage over `src` and `tests` enforced by `pytest.ini`, under the 2 GB memory watchdog (about 2.5 min at load 4 to 8, most of it the formula test's sympy work and the 45 s compiled pole check in a child process; run one file with the command below while working) | `uv run pytest` |
 | Run every pre-commit hook (the same checks through `uv run --locked`; `uv run pre-commit install` installs the pre-commit and pre-push hooks, and pre-push runs `tools/run_notebooks.py`, which finds no notebooks yet) | `uv run pre-commit run --all-files` |
 | One test file quickly, no coverage | `uv run pytest tests/test_x.py -k name --no-cov` |
 | Time every function on 100,000 points, spec criterion 2 (about 5 s; table, `__data__/timing.csv`, exit status 1 if any is over 0.1 s, except the stated exceptions in `src/optibench/scripts/timing.py`) | `uv run python -m optibench.scripts.timing [--points N] [--repeats K]` |
