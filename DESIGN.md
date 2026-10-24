@@ -316,15 +316,17 @@ Tasks:
   (section 4.3), the second pole upright. The test runs only when a
   network balanced all 1,000 steps, as Gruau ran it only on champions.
 
-Speed (the user, 2026-10-24: keep 10 s, add numba): the cart simulation
-is compiled with numba (run-time dependency, 43 MB on macOS with
-llvmlite). 1,000 networks on 100,000 double-pole steps take under 10 s on
-this Mac, excluding the policy's own time, checked by `scripts.timing`.
+Speed (the user, 2026-10-24: keep 10 s, add numba; then, measured, a
+budget of 35 s): the cart simulation is compiled with numba (run-time
+dependency, 43 MB on macOS with llvmlite), on all cores from 64 carts.
+1,000 networks on 100,000 double-pole steps, every one balancing to the
+end, take at most 35 s on this Mac, excluding the policy's own time,
+checked by `scripts.pole_timing`. The 10 s target was not met (Results).
 Tests run the same code uncompiled (`NUMBA_DISABLE_JIT=1`, set in
 `tests/conftest.py`) so coverage sees it.
 
 Proof (the user, 2026-10-24: reference solutions; the controller is
-`networks.LinearController`, in the package because `scripts.timing`
+`networks.LinearController`, in the package because `scripts.pole_timing`
 needs it too): one network step
 equals two hand-computed RK4 steps of the appendix equations to 1e-12; a
 hand-built 2-2-1 network solves XOR; a linear state-feedback controller
@@ -834,6 +836,13 @@ optibench, and what was decided:
 
 ## Rejected approaches
 
+- fastmath for the compiled cart (2026-10-24): chosen by the user on my
+  report that it halved the time, but that halving came from the
+  parallel kernel, which a stale cache had made serial in the other
+  runs. Measured fairly: 188 us a step exact, 190 with fastmath, for
+  1,000 carts. It also lets results differ between machines, so the user
+  dropped it.
+
 - Porting the GPL-2.0 R code: see Decisions.
 - Applying the matrix to a batch in COCO's order (a loop over j adding
   `x[:, j] * matrix[:, j]`) and summing the penalty with `cumsum`
@@ -875,6 +884,7 @@ optibench, and what was decided:
 | Formulas F3: many local minima (16) (`tests/test_formula.py`, as F1) | formula against numpy | all 41 new problem variants equal to rtol 1e-12, atol 1e-10 | suite 1693 tests, 9.4 s without coverage at load average 21; the first formula test pays sympy's import (3.3 s under that load), every other formula test under 0.05 s |
 | Formulas F2: plate (5), steep (3) and valley (4) (`tests/test_formula.py`, as F1) | formula against numpy | all 32 new problem variants equal to rtol 1e-12, atol 1e-10; Booth prints as `(x1 + 2.0*x2 - 7.0)**2 + (2.0*x1 + x2 - 5.0)**2` | suite 1652 tests, about 6 s |
 | Formulas F1: the 9 bowl functions (`tests/test_formula.py`, d = 1 to 6, 26 points each, 2026-10-17) | formula against numpy | all 42 problem variants equal to rtol 1e-12, atol 1e-10 | suite 1578 to 1620 tests, about 5 s either way |
+| network-core N6, double-pole speed (`scripts.pole_timing`, 1,000 reference networks, 100,000 steps, 5 runs, wall time less the policy's, 2026-10-24) | seconds | serial: median 37.5 s, spread 0.5 s (load 4 to 5); parallel, after the cache fix: median 28.2 s, spread 6.4 s (load 4 rising to 11); kernel alone 188 us a step parallel, 363 to 426 us serial | the 10 s target is not met: each cart step needs 16 sines and cosines, and the policy is called from Python every step; the budget is 35 s (the user) |
 | network-core N5, Gruau's score and test (2026-10-24) | the damping score against eq. 3 and 4 worked by hand; the reference on the 625 starts, compiled | equal to 1e-12; the reference without velocities wins 535 of 625 on Gruau's ranges (167 on the full input scales, the spec's fallback before the paper was found; Gruau reports 569 on average with velocities) and passes the solution test | the compiled child test now takes about 45 s at load 8 |
 | network-core N4, pole tasks (2026-10-24) | the linear reference (discrete LQR of the linearised cart, unit weights; velocities differenced from the last two observations when unseen) | 100,000 steps from the published start in all four variants, compiled, about 3 s each at n = 1; 4 random trials of 1,000 steps won at seed 1 in all four; at seed 0 one double-pole start is lost; a constant zero push fails every variant | 14 tests; the 100,000-step check runs in a child process with numba on (13 s) |
 | network-core N3, cart dynamics (2026-10-24) | one network step against an independent RK4 of Gomez et al. (2008) Appendix A; speed of the compiled step | equal to 1e-12 for one and two poles; double pole compiled, 1 thread 477 ns per cart-step, 8 threads 241 ns at load 12; one cart 1.8 us a step (serial kernel), where the parallel one cost 85 us | 1,000 networks on 100,000 steps: about 48 s on one core, 24 s at load 12 on 8; under 10 s needs about 5 free cores (N6 measures it) |
@@ -911,6 +921,14 @@ optibench, and what was decided:
 | Random-search baseline, all 49 by `scripts.baseline` (10 seeds of 10,000 points, d = 10 where free, Powell d = 8, 2026-10-17) | median final value minus the minimum | 1-D: about 1e-6 (Forrester, Gramacy and Lee); 2-D: 1e-4 to 10 (Cross-in-Tray 3e-4, Branin 4e-3, Eggholder 16); d = 10: Sphere 13, Rastrigin 72, Rosenbrock 1.1e4, Perm 0 2e14, Perm d, beta 2e15 | the reference an optimiser must beat at the same budget; Michalewicz d = 10 reaches -4.8 of -9.66, Shekel -3.2 of -10.54 |
 
 ## Gotchas
+
+- numba's disk cache (`cache=True`) names an entry after the function and
+  its line, so two builds of one function (serial and parallel) share
+  it, and the parallel dispatcher loaded the serial code: 371 us a step
+  instead of 188. The cache is also keyed to the function's own file, so
+  changing a decorator in `compiled.py` left stale code in use. The
+  parallel build is not cached; after changing compile options, delete
+  `src/optibench/networks/__pycache__/*.nb[ci]` (2026-10-24).
 
 - The cart's Coulomb friction (`0.0005 * sign(x')`) jumps at zero speed,
   so linearising the cart by finite differences at rest with friction on

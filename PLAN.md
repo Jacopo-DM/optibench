@@ -226,7 +226,9 @@ Tier 2, in order:
   trajectory equals eq. 3 and 4 computed by hand; the recurrent reference
   passes at least 200 of 625. Risk medium (the start ranges are open);
   about 120 lines.
-- N6. The speed check in `scripts/timing.py`: 1,000 copies of the linear
+- N6. done (2026-10-24, as `scripts/pole_timing.py`, its own script
+  because it takes minutes; median 28.2 s, budget 35 s, the user's). The
+  speed check in `scripts/timing.py`: 1,000 copies of the linear
   reference on 100,000 double-pole steps, compiled, under 10 s, run 5
   times for the median and spread. Risk low; about 40 lines.
 

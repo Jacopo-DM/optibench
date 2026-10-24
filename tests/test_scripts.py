@@ -12,7 +12,7 @@ from pydantic import ValidationError
 
 import optibench
 from optibench import Sphere
-from optibench.scripts import baseline, common, timing
+from optibench.scripts import baseline, common, pole_timing, timing
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -116,3 +116,44 @@ def test_baseline_arguments_parse_or_raise_validation_error(
 def test_arguments_default_without_flags() -> None:
     assert timing.parse_arguments([]) == timing.Arguments()
     assert baseline.parse_arguments([]) == baseline.Arguments()
+
+
+def test_pole_timing_reports_and_meets_a_budget(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert pole_timing.main(["--networks", "3", "--steps", "20"]) == 0
+    out = capsys.readouterr().out
+    assert "every cart 20 steps" in out
+    assert "within the 35 s budget" in out
+
+
+def test_pole_timing_fails_over_budget(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pole_timing, "BUDGET", -1.0)
+    argv = ["--networks", "2", "--steps", "5", "--repeats", "1"]
+    assert pole_timing.main(argv) == 1
+
+
+@given(st.text(), st.text(), st.text())
+@example("1000", "100000", "5")
+@example("2.0", "1", "1")
+def test_pole_timing_arguments_parse_or_raise_validation_error(
+    networks: str,
+    steps: str,
+    repeats: str,
+) -> None:
+    """Any text parses to arguments or raises ValidationError."""
+    try:
+        args = pole_timing.parse_arguments(
+            [
+                f"--networks={networks}",
+                f"--steps={steps}",
+                f"--repeats={repeats}",
+            ],
+        )
+    except ValidationError:
+        return
+    assert (args.networks, args.steps, args.repeats) == (
+        int(networks),
+        int(steps),
+        int(repeats),
+    )

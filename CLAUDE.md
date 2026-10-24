@@ -22,6 +22,7 @@ All commands run from the repo root with uv (Python 3.13).
 | Run every pre-commit hook (the same checks through `uv run --locked`; `uv run pre-commit install` installs the pre-commit and pre-push hooks, and pre-push runs `tools/run_notebooks.py`, which finds no notebooks yet) | `uv run pre-commit run --all-files` |
 | One test file quickly, no coverage | `uv run pytest tests/test_x.py -k name --no-cov` |
 | Time every function on 100,000 points, spec criterion 2 (about 5 s; table, `__data__/timing.csv`, exit status 1 if any is over 0.1 s, except the stated exceptions in `src/optibench/scripts/timing.py`) | `uv run python -m optibench.scripts.timing [--points N] [--repeats K]` |
+| Time the double pole on 1,000 reference networks for 100,000 steps, goal network-core (about 3 min; 5 repeats, median and spread, exit status 1 if the median is over 35 s; run nothing else meanwhile) | `uv run python -m optibench.scripts.pole_timing [--networks N] [--steps S] [--repeats K]` |
 | Run the random-search baseline on every function, 10 seeds of 10,000 points (about 1 s; table, curves in `__data__/baseline/`) | `uv run python -m optibench.scripts.baseline [--budget N] [--seeds K]` |
 
 `mypy.ini`, `ruff.toml`, `pytest.ini`, `pyrightconfig.json`, `ty.toml`,
@@ -97,7 +98,8 @@ Before every commit run format, lint, both type checks and the tests above.
   A simulation that steps one network at a time loops in code compiled
   through `networks/compiled.py` instead; tests run it uncompiled
   (`NUMBA_DISABLE_JIT=1` in `tests/conftest.py`), so a change there is
-  checked compiled by `scripts.timing` too.
+  checked compiled too, by the child-process test in
+  `tests/test_networks_poles.py`.
 - Keep each file under 400 lines; split a group module before it grows past,
   alphabetically, naming the parts after their first and last function
   (`many_local_minima_bukin_to_gramacy.py`) or after what they share

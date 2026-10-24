@@ -7,7 +7,7 @@ commit this file was last regenerated.
 One language (Python 3.13, uv). No cross-language boundary and no data
 files. Other code imports the package only through `optibench/__init__.py`.
 
-## `src/optibench` (8936 lines, 45 files)
+## `src/optibench` (9077 lines, 46 files)
 
 Purpose: optimisation test functions with domains and known minima.
 
@@ -148,14 +148,16 @@ Powell at the largest multiple of 4 up to it), `timing.py`
 (`Arguments` and `parse_arguments(argv)`, the `Timing` row,
 `time_problem(problem, points, repeats)`, `BUDGET`, `EXCEPTIONS` (problems
 allowed over it), `main` returning the exit status), `baseline.py`
-(`Arguments`, `parse_arguments(argv)`, `main`));
+(`Arguments`, `parse_arguments(argv)`, `main`), `pole_timing.py`
+(`Arguments`, `parse_arguments(argv)`, `Timed`, `time_poles(networks,
+steps)`, `BUDGET`, `main`));
 `networks/` (tasks that score a batch of networks, separate from
 `Problem`: `policy.py` (`Policy`, a `Protocol` with `reset(n)` and
 `__call__(inputs (n, n_in)) -> (n, n_out)`; `single(fn, reset)` wraps one
 network), `task.py` (`Task`, the frozen base with `n_inputs`,
 `n_outputs`, `evaluate(policy, n, seed, trials) -> Scores` and `_trial`;
 `Scores` with `score` and `solved`), `compiled.py` (the only import of numba: `compiled`,
-`compiled_parallel`, `rows`), `cart.py` (`Cart` with the constants of
+`compiled_parallel` (not cached on disk), `rows`), `cart.py` (`Cart` with the constants of
 Gomez et al. 2008, `Cart.single()`, `Cart.double()`, and
 `advance(states, forces, cart)`: one network step of RK4 in place,
 parallel from `PARALLEL_FROM` carts), `poles.py` (`Poles`, the shared
@@ -163,14 +165,14 @@ simulation with `velocities`, `start_angle`, `steps`, `scale`,
 `start`, `observe`, `run`; `SinglePole`; `DoublePole` with `gruau` and
 `generalisation(policy, n)`, Gruau's 625-start count),
 `reference.py` (`LinearController(task)`, the regulator that balances
-all four, used by tests and `scripts.timing`), `tracked.py` (`TrackedTask(task)`:
+all four, used by tests and `scripts.pole_timing`), `tracked.py` (`TrackedTask(task)`:
 `evaluations`, `best_score`, `solved_at`, `curve`), `xor.py` (`Xor`));
 it uses only `model`. `__init__.py`. Order: `problem` is the leaf;
 `references` and `known_minima` use only `problem`; the group modules use
 those (the BBOB modules use `bbob_common`); `registry` reads `functions.__all__`; `tracking` uses only the
 `Problem` type; `baseline` uses `tracking`.
 
-## `tests` (2566 lines, 23 files)
+## `tests` (2607 lines, 23 files)
 
 `test_all_problems.py` (spec criterion 6 for every registered problem, at
 its defaults and free dimensions at d = 8), `test_functions.py` (Sphere,
