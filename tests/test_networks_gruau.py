@@ -124,3 +124,8 @@ def test_window_holds_only_balanced_steps() -> None:
     window = np.abs(np.array(policy.seen[t - GRUAU_WINDOW + 1 : t + 1])[:, :4])
     f2 = min(1.0, 0.75 / window.sum())
     assert score == pytest.approx(0.1 * t / GRUAU_STEPS + 0.9 * f2, rel=1e-12)
+
+
+def test_gruau_runs_one_trial_only() -> None:
+    with pytest.raises(ValueError, match="one trial"):
+        DoublePole(gruau=True).evaluate(Constant(0.0), trials=2)

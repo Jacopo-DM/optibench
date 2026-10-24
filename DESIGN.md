@@ -314,7 +314,9 @@ Tasks:
   each of x, x', the first angle and its velocity at 0.05, 0.25, 0.5,
   0.75 and 0.95 of +-2.16 m, +-1.35 m/s, +-3.6 deg and +-8.6 deg/s
   (section 4.3), the second pole upright. The test runs only when a
-  network balanced all 1,000 steps, as Gruau ran it only on champions.
+  network balanced all 1,000 steps, as Gruau ran it only on champions,
+  and `gruau` takes one trial only (Gruau's protocol: one run from the
+  published start).
 
 Speed (the user, 2026-10-24: keep 10 s, add numba; then, measured, a
 budget of 35 s): the cart simulation is compiled with numba (run-time

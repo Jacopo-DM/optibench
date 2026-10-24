@@ -15,7 +15,7 @@ from pydantic import Field
 
 from .cart import Cart, advance
 from .policy import Policy
-from .task import Task
+from .task import Scores, Task
 
 TRACK = 2.4
 MAX_FORCE = 10.0
@@ -261,6 +261,33 @@ class DoublePole(Poles):
     @override
     def failure_angle(self) -> float:
         return 36.0
+
+    @override
+    def evaluate(
+        self,
+        policy: Policy,
+        n: int = 1,
+        seed: int = 0,
+        trials: int = 1,
+    ) -> Scores:
+        """Score ``n`` networks; see ``Task.evaluate``.
+
+        Returns
+        -------
+        Scores
+            The mean score and whether every trial was solved.
+
+        Raises
+        ------
+        ValueError
+            With ``gruau``, if ``trials`` is not 1: Gruau's protocol is one
+            trial from the published start, and its 625-start test would
+            otherwise run again in every trial.
+        """
+        if self.gruau and trials != 1:
+            msg = f"gruau scores one trial from the start, got {trials}"
+            raise ValueError(msg)
+        return super().evaluate(policy, n, seed, trials)
 
     def generalisation(self, policy: Policy, n: int) -> NDArray[np.int64]:
         """Count the starts of Gruau's 625 that each network balances.
