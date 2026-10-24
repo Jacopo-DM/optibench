@@ -11,6 +11,7 @@ from typing import override
 
 import numpy as np
 from numpy.typing import NDArray
+from pydantic import Field
 
 from .cart import Cart, advance
 from .policy import Policy
@@ -75,7 +76,23 @@ class Poles(Task):
 
     velocities: bool = True
     start_angle: float = 4.0
-    steps: int = 100_000
+    steps: int = Field(default=100_000, ge=1)
+
+    @override
+    def model_post_init(self, context: object, /) -> None:
+        """Check that the first pole starts upright enough to balance.
+
+        Raises
+        ------
+        ValueError
+            If ``start_angle`` is at or past the failure angle.
+        """
+        if abs(self.start_angle) >= self.failure_angle:
+            msg = (
+                f"start_angle must be within +-{self.failure_angle} deg, "
+                f"got {self.start_angle}"
+            )
+            raise ValueError(msg)
 
     @property
     @abstractmethod

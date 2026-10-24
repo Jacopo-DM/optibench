@@ -8,6 +8,7 @@ import sys
 import numpy as np
 import pytest
 from numpy.typing import NDArray
+from pydantic import ValidationError
 
 from optibench.networks import DoublePole, LinearController, SinglePole
 from optibench.networks.poles import START_SPREAD, Poles
@@ -147,3 +148,19 @@ def test_reference_balances_the_full_budget_compiled() -> None:
 
     # Gruau's solution test: 535 of 625 starts, and so solved.
     assert lines[4:6] == ["535", "True"]
+
+
+@pytest.mark.parametrize(
+    ("settings", "message"),
+    [
+        ({"steps": 0}, "greater than or equal to 1"),
+        ({"start_angle": 12.0}, "start_angle must be within"),
+        ({"start_angle": -13.0}, "start_angle must be within"),
+    ],
+)
+def test_impossible_settings_are_refused(
+    settings: dict[str, float],
+    message: str,
+) -> None:
+    with pytest.raises(ValidationError, match=message):
+        SinglePole.model_validate(settings)
