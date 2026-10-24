@@ -134,6 +134,17 @@ def test_reference_balances_the_full_budget_compiled() -> None:
         "reference = LinearController(task)\n"
         "print(int(task.generalisation(reference, 1)[0]))\n"
         "print(bool(task.evaluate(reference).solved[0]))\n"
+        "import numpy as np\n"
+        "from optibench.networks.cart import Cart, advance\n"
+        "rng = np.random.default_rng(0)\n"
+        "many = rng.uniform(-0.1, 0.1, (200, 6))\n"
+        "rows = [row[None].copy() for row in many]\n"
+        "push = rng.uniform(-10, 10, 200)\n"
+        "for _ in range(200):\n"
+        "    advance(many, push, Cart.double())\n"
+        "    for i, row in enumerate(rows):\n"
+        "        advance(row, push[i : i + 1], Cart.double())\n"
+        "print(float(np.abs(many - np.vstack(rows)).max()))\n"
     )
     env = {k: v for k, v in os.environ.items() if k != "NUMBA_DISABLE_JIT"}
     done = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true]  # fixed arguments
@@ -148,6 +159,9 @@ def test_reference_balances_the_full_budget_compiled() -> None:
 
     # Gruau's solution test: 535 of 625 starts, and so solved.
     assert lines[4:6] == ["535", "True"]
+
+    # 200 carts step on all cores exactly as one at a time.
+    assert lines[6] == "0.0"
 
 
 @pytest.mark.parametrize(
