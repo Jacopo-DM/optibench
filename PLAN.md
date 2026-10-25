@@ -108,8 +108,10 @@ returns its natural reward, negative where the physics gives one.
   Dependabot's PR #1 (setup-uv 9.0.0 to 10.3.0) was merged by rebase on
   2026-10-17 (2aea30c, the user's say-so), so `ci.yml` now pins a newer
   setup-uv than the user's template.
-- `entwined` does not use this library yet; its adapters are separate
-  modules in that repo (see its PLAN.md).
+- `entwined` uses this library as a git dependency (its `symreg` group,
+  since its task S1, 2026-10-18), pinned by full hash: 690f912 until
+  2026-10-24, 693876d since. Its adapters are separate modules in that
+  repo (see its PLAN.md).
 - Module `formula` done (2026-10-18): all 83 problems have `formula()`,
   abstract on `Problem` (results, decisions and the amended spec in
   DESIGN.md). 2005 tests, 100% coverage; the suite takes about 2 min at
@@ -118,7 +120,8 @@ returns its natural reward, negative where the physics gives one.
   distribution and import name (a705f51). The GitHub repo is now
   `Jacopo-DM/optibench` (the old URL redirects), `origin` points at it,
   and `main` was pushed at a705f51 (the user's say-so). The local folder
-  is now `1xx_projects/optibench` too, with its `.venv` rebuilt.
+  became `1xx_projects/optibench` too, with its `.venv` rebuilt (and
+  `4xx_dual_pc/optibench` later; DESIGN.md has the current path).
 - Audit (`/zz-11-audit`, 2026-10-23): a fresh clone installs, passes 2005
   tests at 100% coverage and builds a wheel with `py.typed`; the README
   example runs; gitleaks finds nothing. Its shortfalls are tasks 4 to 6
@@ -134,11 +137,13 @@ returns its natural reward, negative where the physics gives one.
 
 Next step: the spec of goal `network-fit` (the next goal in order), with
 `/zz-02-project-plan`; `network-core` is done on branch `network-core`. In
-`entwined` (2026-10-24, its own session): the move to `optibench` at
-693876d is merged into its branch `better-search` (f2366b3 on the Mac; 384
-tests and all 21 notebooks pass), with its own `optbench` names renamed;
-nothing there is pushed, and its branch `optibench-rename` still exists.
-After that, `entwined`'s goal `optbench-symreg`, task S1 (its PLAN.md).
+`entwined` (done 2026-10-24, its own session): the move to `optibench`
+at 693876d, with its own `optbench` names renamed too (goal
+`optibench-symreg`, modules `optibench_symreg` and `optibench_table`),
+is pushed on its `better-search` at 9b0f9e4 and the branch
+`optibench-rename` deleted. Its next work is in its own PLAN.md (its
+task S1 was done on 2026-10-18; the brief that named it as next was
+wrong).
 
 ## Baseline (2026-10-23, at 693876d)
 
