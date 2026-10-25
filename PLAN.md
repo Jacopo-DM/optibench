@@ -143,7 +143,12 @@ at 693876d, with its own `optbench` names renamed too (goal
 is pushed on its `better-search` at 9b0f9e4 and the branch
 `optibench-rename` deleted. Its next work is in its own PLAN.md (its
 task S1 was done on 2026-10-18; the brief that named it as next was
-wrong).
+wrong). Left for `entwined`'s own sessions, not recorded there on
+2026-10-25 because the Legion's `better-search` held an unpushed
+commit (fac479d) and a Mac commit would have split the branch: the
+`--rows` help in `src/benchmarks/search_probe.py` ("groups (panel,
+hard)") omits the `optibench` group, and its CLAUDE.md says "384
+tests on Linux, 2 of them macOS-only" while the Mac collects 385.
 
 ## Baseline (2026-10-23, at 693876d)
 
