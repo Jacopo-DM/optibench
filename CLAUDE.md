@@ -33,7 +33,7 @@ check through (the Stop hook compares them with the templates); refresh
 them with `rsync-sync pull python` in a clean tree and read the diff (it
 also copies `main.py`, which this library deletes). Approved
 exceptions, both from Dependabot (the user, 2026-10-23 and 2026-10-24):
-`ci.yml` keeps setup-uv v10.3.0 over the template's v9.0.0, and uv 0.13.4
+`ci.yml` keeps setup-uv v10.3.1 over the template's v9.0.0, and uv 0.13.4
 (the uv-pre-commit `rev` in `.pre-commit-config.yaml` and `version` in
 `ci.yml`, kept equal) over the template's 0.13.1; put those lines back
 after a refresh.

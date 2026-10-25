@@ -133,10 +133,15 @@ returns its natural reward, negative where the physics gives one.
   user's say-so, 2026-10-23); CI passed on it. Dependabot's PR #2 (the
   uv-pre-commit hook 0.13.1 to 0.13.4) gained a commit setting CI's uv to
   0.13.4 too (2026-10-24, the user's go-ahead); CI passed and it was
-  merged by rebase (af12724).
+  merged by rebase (af12724). Dependabot's PR #3 (setup-uv 10.3.0 to
+  10.3.1) passed CI and was merged by rebase on 2026-10-25 (03c2846, the
+  user's go-ahead); CI on `main` at 03c2846 was still running then.
 
 Next step: the spec of goal `network-fit` (the next goal in order), with
-`/zz-02-project-plan`; `network-core` is done on branch `network-core`. In
+`/zz-04-project-plan` (only the user starts it); `network-core` is merged
+into `main` and pushed (d50a403), and its branches are gone. `multineat`'s
+planning session has the `network-core` interface (sent 2026-10-24), and
+will write its benchmark goal against it. In
 `entwined` (done 2026-10-24, its own session): the move to `optibench`
 at 693876d, with its own `optbench` names renamed too (goal
 `optibench-symreg`, modules `optibench_symreg` and `optibench_table`),
@@ -150,10 +155,12 @@ commit (fac479d) and a Mac commit would have split the branch: the
 hard)") omits the `optibench` group, and its CLAUDE.md says "384
 tests on Linux, 2 of them macOS-only" while the Mac collects 385.
 
-## Baseline (2026-10-23, at 693876d)
+## Baseline (2026-10-25, at 6081195, in `4xx_dual_pc/optibench`)
 
-Every check in CLAUDE.md passes; the counts are in DESIGN.md's Results,
-row "Python compliance". `pytest` takes 1 min 50 s at load 4 to 6.
+Every check in CLAUDE.md passes: ruff format and check, mypy (71 files)
+and pyright clean; `pytest` 2059 tests at 100% branch coverage in 2 min
+47 s; ty (advisory) the 2 findings under Known problems. The speed of
+the double pole is in DESIGN.md's Results, row "network-core N6".
 
 ## Tasks (approved modules, 2026-10-17)
 
@@ -182,7 +189,8 @@ COCO's Python package as a dev-only dependency are approved too.
    CLAUDE.md's, its Python version a copy of DESIGN.md's decision); Specs
    and Gotchas in DESIGN.md.
 6. open (the user, 2026-10-23: yes, later): a Sphinx docs site on GitHub
-   Pages with `/zz-09-python-docs`.
+   Pages with `/py-02-docs` (named `/zz-09-python-docs` when the task was
+   set).
 
 ### Goal `network-core`: done (2026-10-24, de90688 to dcd3571)
 
